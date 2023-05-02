@@ -1,0 +1,123 @@
+config KERNEL_PRINTK
+	bool "Enable printing in kernel"
+	default y
+
+config KERNEL_LEVEL
+	int "Kernel debug level"
+	default "7"
+	range 0 8
+	depends on KERNEL_PRINTK
+	help
+	 Limit the kernel's debug message level:
+	 1: emergency
+	 2: alerts
+	 3: critical conditions
+	 4: error conditions
+	 5: warnings
+	 6: notices
+	 7: informational
+	 8: debug
+
+config IRQ_STATS_COLLECT
+	bool "Enable IRQ statistics via sysctl"
+	depends on SYSCTL
+	default n
+	help
+	 Collect interrupt statistics and expose them in the
+	 systl tree.
+
+config TASK_PREEMPTION_DISABLE
+	bool "Disable forced preemption of tasks"
+	default n
+	help
+	 Say Y here to change the task system to be collaborative, i.e.
+	 for voluntary yields and run-to-completion. Note that this does not
+	 mean that tasks can not be preempted at all, just that there will
+	 be no supervisor to instigate such an event. Any IRQs will still
+	 preempt a running task, as will blocked I/O and locking operations.
+	 The latter may result in a rescheduling events to prevent priority
+	 inversion etc.
+	 WARNING: Currently unstable. Use for development only. You have been warned.
+
+config SOC
+	bool "Enable System-On-Chip configurations"
+	default n
+
+choice
+	prompt "Select board type"
+	default MPPB
+	depends on SOC
+
+config MPPB
+	bool "MPPBv2"
+	depends on SOC && LEON2
+	help
+	 Configure parameters for the MPPBv2
+
+config SSDP
+	bool "SSDP"
+	depends on SOC && LEON3
+	help
+	 Configure parameters for the SSDP
+
+endchoice
+
+menu "System-on-Chip drivers"
+
+depends on SOC
+
+
+
+config NOC_DMA
+	tristate "NoC 2D DMA driver"
+	default y
+	depends on SOC && (MPPB || SSDP)
+	help
+	 Build the MPPBv2/SSDP NoC DMA driver.
+
+config NOC_DMA_TRANSFER_QUEUE_SIZE
+	int "NoC DMA transfer queue size"
+	default "32"
+	depends on NOC_DMA
+	help
+	 Configures the size of the DMA transfer queue.
+
+config NOC_DMA_STATS_COLLECT
+	bool "Enable NoC DMA statistics via sysctl"
+	depends on SYSCTL
+	default n
+	help
+	 Collect DMA transfer statistics and expose them in the
+	 systl tree.
+
+config NOC_DMA_SAME_MASTER_TRANSFER_WORKAROUND
+	bool "Enable workaround for NoC DMA transfers within same master"
+	default n
+	help
+	 Enable a workaround for NoC DMA transfers with the address space
+	 of the same master. On the MPPB this will result in a stuck channel,
+	 as the transfer never completes. If you say Y here, the requested
+	 transfer will be initialised as two transfers, one of high priority
+	 that copies the source data into a scratch buffer (the NoC SRAM tile)
+	 and a low priority transfer that copies the contents of the scratch
+	 buffer to the destination. Results may be unpredictable,
+	 you have been warned.
+
+config XENTIUM
+	tristate "Xentium processing network support"
+	default y
+	depends on NOC_DMA
+	help
+	 Build the driver to operate a Xentium processing network
+
+endmenu
+
+config TESTMODULE
+	tristate "a test module"
+	default m
+	depends on SYSCTL
+	help
+	 an example module for testing of the module loader
+
+
+

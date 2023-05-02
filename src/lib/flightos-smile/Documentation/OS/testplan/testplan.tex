@@ -1,0 +1,382 @@
+
+
+\title{Test Plan}
+\def \documentid {FLIGHTOS-UVIE-TP-001}
+\date{Issue 1.0, June 1, 2017}
+
+\newcommand\affil[1]{\textsuperscript#1}
+
+\def\preparedby {Armin Luntzer\affil{1}}
+\def\checkedby {Roland Ottensamer\affil{1}, Christian Reimers\affil{1}}
+\def\approvedby {Franz Kerschbaum\affil{1}}
+
+\def\affiliations{
+	\affil{1} Department of Astrophysics, University of Vienna
+}
+
+
+
+
+\input{../shared/template/univie.tex}
+\input{../shared/template/titlepage.tex}
+\input{../shared/template/traceability.tex}
+\input{../shared/glossary.tex}
+
+\usepackage{vhistory}
+
+\usepackage[backend=biber]{biblatex}
+\addbibresource{../shared/bibliography.bib}
+% URL to new line %
+\DeclareFieldFormat{url}{URL: \url{#1}}%
+
+\DeclareFieldFormat{formaturl}{\newline #1}
+\newbibmacro*{url+urldate}{%
+\printtext[formaturl]{%
+  \quad \printfield{url}}%
+    }
+
+\rereadauxrequirementlabels
+
+\exportrequirements
+
+
+\begin{document}
+
+
+\setmainfont{MyriadPro-SemiCondensed}
+\uvietitlepage%
+{Lean OS --\\ An operating system for the SSDP}%
+{\doctitle}%
+{../shared/images/logo2.pdf}
+\setmainfont{MyriadPro}
+
+\approvalpage
+
+\tableofcontents
+\newpage
+
+
+\chapter*{List of Requirements}
+\the\requirementlist
+
+
+\begin{versionhistory}
+  \vhEntry{0.1}{23.07.2017}{AL}{initial version}
+  \vhEntry{0.2}{01.07.2016}{AL}{incorporate changes from review items}
+  \vhEntry{1.0}{01.06.2017}{FK}{document approved}
+\end{versionhistory}
+
+
+\chapter{Introduction}
+
+\begin{figure}[htb]
+\begin{center}
+	\includegraphics[width=\columnwidth]{../requirements/images/OS_logical}
+	\caption{The logical model of FlightOS. Here, the "hardware" layer
+	represents both the hardware and the hardware abstraction layer of
+	the software.}
+	\label{fig:logical_model}
+\end{center}
+\end{figure}
+
+\noindent
+FlightOS\cite{ssdpOS}\cite{flightosADD}\cite{flightosSRS} is an operating system specifically
+designed to support hardware devices with drivers and data processing on the
+\gls{Xentium} \glspl{DSP} of the \gls{SSDP}.\\
+
+In FlightOS, the \gls{SSDP} hardware is accessed in multiple layers of
+abstraction (see \fig{fig:logical_model}). Typical \gls{CPU} tasks such as
+thread/task management and timer operation are used as part of the operating
+system kernel and are also accessible by user applications via a system call
+interface.  Other functional hardware components of the \gls{SSDP} such as the
+\gls{NoC} \gls{DMA} have their own driver modules. These are in turn used by
+the \gls{Xentium} scheduler and other higher level modules in the operating
+system.  Configuration of and access to the latter from user space is done via
+a system call interface. The system control interface serves as an intermediate
+between all layers of the operating system, where system or module states and
+hardware modes or usage statistics may be exported by individual components for
+external (user) access. \\
+
+\noindent
+The compliance of FlightOS with its requirements and its operational environment
+are partially verified by testing.
+
+
+\section{Purpose of the Document}
+
+This document defines test procedures for the FlightOS operating system.
+In particular, it defines the:
+\begin{itemize}
+	\item types of tests
+	\item environment in which a test is executed
+	\item coverage of the test
+	\item entity responsible for performing the test
+\end{itemize}
+
+
+\section{Incremental Testing}
+
+FlightOS is not envisaged to be implemented in one final form. Instead, it is
+marked with version numbers for each release. This means that testing is
+version-dependent and is be applied in increments by executing a sub-set of
+tests only as modifications are made.
+
+
+\section{Test Sequences}
+
+Tests defined in this document are executed by automated test sequences in the
+form of software programs that control the execution of a test, check the
+correctness of the results and generate a summary report of the test case.
+
+
+
+\section{Items Under Test}
+
+Components and software modules of the operating system are tested on an
+unit-level where applicable. System level tests are tailored to the
+various configuration options available. and shall be accompanied by
+configuration files so the proper build may generated.\\
+\\
+
+\requirement{IUT-0001} {Hardware constraints}{%
+The test plan specified by the present requirements shall apply to all parts %
+of FlightOS.
+}{}
+
+
+
+\section{Operational Constraints}
+
+Each test shall specify the minimum hardware platform on which it must be
+performed. Unit-level test of platform-independent components may be executed
+on any compatible hardware. Platform-dependent tests may require specific
+hardware models (e.g. the \gls{SSDP} for testing of the \gls{NoC}) or just any
+compatible processor model (e.g. \gls{LEON3} for testing the operation of the
+\gls{MMU}).\\
+\\
+
+\requirement{OPC-0001} {Hardware constraints}{%
+The execution of the tests defined in this document shall comply with all %
+the operational constraints applicable to the hardware used in the tests.%
+}{}
+
+
+
+\chapter{Applicable and Reference Documents} % does not break automatically for some reason
+
+\printbibliography[heading=none]
+
+
+\chapter{Terms, Definitions and Abbreviated Items}
+\printglossary[type=acronym]
+\printglossary[type=main, style=altlist]
+
+
+\chapter{Types of Tests}
+
+In order to satisfy the verification and validation needs of the test campaign,
+the following types of tests are defined for FlightOS:
+\begin{itemize}
+	\item unit and integration tests
+	\item hardware-software tests
+\end{itemize}
+
+
+\section {Unit and Integration Tests}
+
+FlightOS is developed as a collection of individual, interacting components.
+A unit test verifies the behaviour of a single component, while an integration
+test verifies the behaviour of a number of interacting components. \\
+
+\noindent
+Unit and integration tests are white-box type tests that executes a component
+with a series of input conditions and verify the output or action for the
+expected response. These type of tests are typically independent from the
+hardware platform.\\
+\\
+
+\requirement{UIT-0001} {Unit/Integ. Tests}{%
+Unit and Integration Tests shall be defined and executed for FlightOS components.
+}{Tests can make use of the modified \emph{kselftest} framework provided %
+in the FlightOS source tree.
+}%
+
+\requirement{UIT-0002} {Test Suite}{%
+A unit and integration test suite shall be provided as a set of applications.
+}{}%
+
+\requirement{UIT-0003} {Automatic Test Execution}{%
+A single mechanism shall be provided that automatically runs all unit and %
+integration tests in sequence.\\
+}{
+The \emph{kselftest} framework in the FlightOS source tree provides a %
+\emph{Makefile} setup that can be used for this purpose.}%
+
+\requirement{UIT-0004} {Test Results}{%
+The test suite shall generate feedback as a human-readable report describing the %
+outcome of each unit and integration test.%
+}{}
+
+\requirement{UIT-0005} {Automatic Testing}{%
+A feedback mechanism shall be provided that allows an external automated %
+testing mechanism to execute and detect the results of unit and integration %
+tests.%
+}{This is very useful for automated bisection of code versions, e.g. by %
+using the \emph{git bisect run \ldots} functionality.}%
+
+
+\section {Hardware-Software Tests}
+
+These tests differ from unit and integration tests in that a particular hardware
+platform is required for testing. All system-level integration tests fall into
+this category.\\
+\\
+
+\requirement{HST-0001} {Hardware Tests}{%
+Hardware-software tests shall be defined and executed for FlightOS components %
+with the objective of verifying the behaviour of components which directly %
+interact with the relevant target hardware.%
+}{}
+
+\requirement{HST-0002} {Test Suite}{%
+A hardware-software test suite shall be provided as a set of applications.
+}{}
+
+\requirement{HST-0003} {Test Results}{%
+The hardware-software tests shall generate feedback as a human-readable %
+report describing the outcome of test.%
+}{}
+
+
+\requirement{HST-0004} {Automatic Testing}{%
+A feedback mechanism shall be provided that allows an external automated %
+testing mechanism to execute and detect the results of hardware-software tests.%
+}{This is very useful for automated bisection of code versions, e.g. by %
+using the \emph{git bisect run \ldots} functionality.}%
+
+
+\section {Acceptance Tests}
+
+Acceptance tests are performed by the user on the integrated processing unit.
+Their objective is to exercise the selected FlightOS configuration while running
+in its operational environment. The operational environment for FlightOS is
+defined by the user according to their use case.\\
+
+
+
+\requirement{ACT-0001} {Acceptance Tests}{%
+Acceptance tests and their procedures shall be defined and executed for FlightOS.
+}{}
+
+\requirement{ACT-0002} {Use Cases}{%
+The configuration and operational environment for an acceptance test of FlightOS
+shall be defined by the user according to their use case.
+}{}
+
+
+
+
+\chapter{Test Environments}
+
+Test beds in which FlightOS tests are performed:
+
+\begin{itemize}
+	\item general-purpose platform for regular unit and integration tests
+	\item \gls{LEON2} and/or \gls{LEON3} platforms for hardware-software tests
+	\item \gls{SSDP} and/or \gls{MPPB} for system-level hardware-software tests
+\end{itemize}
+
+\noindent
+The test environments required for each category of test are described in the
+following sections.
+
+\newpage
+\section{Unit and Integration Test Environment}
+
+\begin{figure}[]
+\begin{center}
+	\includegraphics[width=0.5\columnwidth]{images/unittest}
+	\caption{Unit and integration test environment. Stubs and Mockups %
+	are stand-ins for external dependencies with defined behaviour. %
+	A set of input data is fed into the item under test as specified %
+	in the test procedure.}
+	\label{fig:unittest}
+\end{center}
+\end{figure}
+
+The test environment for unit and integration tests is shown in
+\fig{fig:unittest}.\\
+
+\noindent
+The item under test is either one or a set of components of FlightOS. If needed,
+stub and mockup functions, which simulate the expected behaviour of external
+dependcies, are defined to create a representative environment in which the item
+under test is running.\\
+
+\noindent
+Tests are controlled by a test sequence, which generates inputs for the item
+under test and collects and evaluates the generated output.\\
+\\
+
+\requirement{UITE-0001} {Unit Test Environment}{%
+Unit and integration tests shall be performed in an environment as defined in %
+\fig{fig:unittest}. %
+}{}%
+
+
+\section{Hardware-Software Test Environment}
+
+The hardware-software test environments are detailed on a per-test basis.\\
+\\
+
+\requirement{HSTE-0001} {HW/SW Test Environment}{%
+The required hardware-software test environment shall be defined in the %
+specification of each individual test.%
+}{}%
+
+\chapter{Test Coverage}
+
+This chapter defines the coverage of tests in the environments defined
+previously.
+
+
+\section{Source Code Coverage}
+
+Source code coverage must be achieved in unit and integration tests.
+A component is considered covered if full statement, decision and condition
+coverage is achieved. \\
+
+\noindent
+If full coverage cannot be achieved, for example due to operational constraints,
+deviations are acceptable, provided a justification is given.\\
+\\
+
+\requirement{SCC-0001} {Statement Coverage}{%
+Unit and integration tests shall offer full statement coverage for FlightOS code.%
+}{}%
+
+\requirement{SCC-0002} {Decision Coverage}{%
+Unit and integration tests shall offer full decision coverage for FlightOS code.%
+}{}%
+
+\requirement{SCC-0003} {Condition Coverage}{%
+Unit and integration tests shall offer full condition coverage for FlightOS code.%
+}{}%
+
+\requirement{SCC-0004} {Reduced Coverage}{%
+If the coverage specified in the previous requirements cannot be achieved %
+due to operational contraints, justifications for deviations shall be provided %
+for each of the individual conditions where the degree of coverage is below %
+the specified goal. %
+}{}%
+
+
+
+
+
+
+
+
+
+
+\end{document}
