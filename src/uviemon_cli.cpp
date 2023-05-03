@@ -264,12 +264,12 @@ void wash(FTDIDevice &handle, DWORD size)
 void load(FTDIDevice &handle, string &path)
 {
 	ifstream file;
-	const unsigned int byteSize = 100 * 1024; // FIXED SIZE! 100 kB
-	char buffer[byteSize] = {};
-
 	file.open(path, ios::binary | ios::ate);
 
 	const streamsize size = file.tellg();
+
+	char buffer[size] = {}; // Create buffer for individual BYTES of binary data
+
 	file.seekg(0, ios::beg);
 
 	if (!file.read(buffer, size))
@@ -278,8 +278,13 @@ void load(FTDIDevice &handle, string &path)
 	}
 
 	const streamsize bytesRead = file.gcount(); // Number of bytes actually read
-
 	file.close();
+
+	cout << "Uploading File '" << path << "'..." << endl;
+	cout << "File Size: " << dec << size << " B" << endl;
+	cout << "Size Read: " << dec << bytesRead << " B" << endl;
+	// TODO: Check for compatability or something?
+	cout << endl;
 
 	const unsigned int writeSize = ceil(float(bytesRead) * sizeof(BYTE) / sizeof(DWORD));
 	DWORD writeBuffer[writeSize];
