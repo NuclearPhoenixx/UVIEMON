@@ -759,10 +759,11 @@ BYTE FTDIDevice::scanDRLength(BYTE opcode)
 	// TMS is currently low.
 	// State machine is in Shift-DR, so now use the TDI/TDO command to shift 0's out TDI/DO while reading TDO/DI
 	// Clock out 10 x 8 bits of 0s only to clear any other values
+	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
+	byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
+	byOutputBuffer[dwNumBytesToSend++] = 0x00;
 	for (BYTE i = 0; i < 10; i++)
 	{
-		byOutputBuffer[dwNumBytesToSend++] = 0x1B; // Clock bits out with read
-		byOutputBuffer[dwNumBytesToSend++] = 0x07; // Length + 1 (8 bits here)
 		byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
 	}
 	// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
@@ -917,10 +918,11 @@ DWORD FTDIDevice::ioread32(DWORD addr)
 	byOutputBuffer[dwNumBytesToSend++] = 0b00000011; // Data is shifted LSB first, so the TMS pattern is 1100
 
 	// Clock out 10 x 8 bits of 0s only to clear out any other values
+	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
+	byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
+	byOutputBuffer[dwNumBytesToSend++] = 0x00;
 	for (BYTE i = 0; i < 10; i++)
 	{
-		byOutputBuffer[dwNumBytesToSend++] = 0x1B; // Clock bits out without read
-		byOutputBuffer[dwNumBytesToSend++] = 0x07; // Length + 1 (8 bits here)
 		byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
 	}
 	// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
@@ -1084,10 +1086,11 @@ void FTDIDevice::ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress
 	byOutputBuffer[dwNumBytesToSend++] = 0b00000011; // Data is shifted LSB first, so the TMS pattern is 1100
 
 	// Clock out 10 x 8 bits of 0s only to clear out any other values
+	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
+	byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
+	byOutputBuffer[dwNumBytesToSend++] = 0x00;
 	for (BYTE i = 0; i < 10; i++)
 	{
-		byOutputBuffer[dwNumBytesToSend++] = 0x1B; // Clock bits out without read
-		byOutputBuffer[dwNumBytesToSend++] = 0x07; // Length + 1 (8 bits here)
 		byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
 	}
 	// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
@@ -1235,12 +1238,12 @@ void FTDIDevice::ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress
 
 void FTDIDevice::iowrite8(DWORD addr, BYTE data)
 {
-	BYTE byOutputBuffer[100];	// Buffer to hold MPSSE commands and data to be sent to the FT2232H
-	BYTE byInputBuffer[100];	// Buffer to hold data read from the FT2232H
+	BYTE byOutputBuffer[100]; // Buffer to hold MPSSE commands and data to be sent to the FT2232H
+	// BYTE byInputBuffer[100];	// Buffer to hold data read from the FT2232H
 	DWORD dwNumBytesToSend = 0; // Index to the output buffer
 	DWORD dwNumBytesSent = 0;	// Count of actual bytes sent - used with FT_Write
-	DWORD dwNumBytesToRead = 0; // Number of bytes available to read in the driver's input buffer
-	DWORD dwNumBytesRead = 0;	// Count of actual bytes read - used with FT_Read
+	// DWORD dwNumBytesToRead = 0; // Number of bytes available to read in the driver's input buffer
+	// DWORD dwNumBytesRead = 0;	// Count of actual bytes read - used with FT_Read
 
 	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
 	{
@@ -1267,11 +1270,13 @@ void FTDIDevice::iowrite8(DWORD addr, BYTE data)
 	byOutputBuffer[dwNumBytesToSend++] = 0x03;		 // Number of clock pulses = Length + 1 (4 clocks here)
 	byOutputBuffer[dwNumBytesToSend++] = 0b00000011; // Data is shifted LSB first, so the TMS pattern is 1100
 
+	/*
 	// Clock out 10 x 8 bits of 0s only to clear out any other values
+	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
+	byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
+	byOutputBuffer[dwNumBytesToSend++] = 0x00;
 	for (BYTE i = 0; i < 10; i++)
 	{
-		byOutputBuffer[dwNumBytesToSend++] = 0x1B; // Clock bits out without read
-		byOutputBuffer[dwNumBytesToSend++] = 0x07; // Length + 1 (8 bits here)
 		byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
 	}
 	// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
@@ -1292,6 +1297,7 @@ void FTDIDevice::iowrite8(DWORD addr, BYTE data)
 		ftStatus = FT_GetQueueStatus(_ftHandle, &dwNumBytesToRead);					   // Get the number of bytes in the device input buffer
 	} while ((dwNumBytesToRead == 0) && (ftStatus == FT_OK));						   // or Timeout
 	ftStatus |= FT_Read(_ftHandle, &byInputBuffer, dwNumBytesToRead, &dwNumBytesRead); // Read out the data from input buffer
+	*/
 
 	// Shift out AHB address DWORD (4 bytes)
 	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
@@ -1309,10 +1315,10 @@ void FTDIDevice::iowrite8(DWORD addr, BYTE data)
 	byOutputBuffer[dwNumBytesToSend++] = RW_BYTE; // Write 8-bit BYTE
 
 	// Shift out 1-bit Read/Write Instruction: 0x1 for WRITE while simultaneously leaving Shift-DR via TMS Exit-DR
-	byOutputBuffer[dwNumBytesToSend++] = 0x4B;										   // Clock bits out with read
-	byOutputBuffer[dwNumBytesToSend++] = 0x00;										   // Length + 1 (1 bits here)
-	byOutputBuffer[dwNumBytesToSend++] = 0b10000001;								   // Ones only
-	ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
+	byOutputBuffer[dwNumBytesToSend++] = 0x4B;													 // Clock bits out with read
+	byOutputBuffer[dwNumBytesToSend++] = 0x00;													 // Length + 1 (1 bits here)
+	byOutputBuffer[dwNumBytesToSend++] = 0b10000001;											 // Ones only
+	FT_STATUS ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
 
 	if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
 	{
@@ -1349,11 +1355,13 @@ void FTDIDevice::iowrite8(DWORD addr, BYTE data)
 	}
 	dwNumBytesToSend = 0; // Reset output buffer pointer
 
+	/*
 	// Clock out 10 x 8 bits of 0s only to clear out any other values
+	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
+	byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
+	byOutputBuffer[dwNumBytesToSend++] = 0x00;
 	for (BYTE i = 0; i < 10; i++)
 	{
-		byOutputBuffer[dwNumBytesToSend++] = 0x1B; // Clock bits out without read
-		byOutputBuffer[dwNumBytesToSend++] = 0x07; // Length + 1 (8 bits here)
 		byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
 	}
 	// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
@@ -1374,6 +1382,7 @@ void FTDIDevice::iowrite8(DWORD addr, BYTE data)
 		ftStatus = FT_GetQueueStatus(_ftHandle, &dwNumBytesToRead);					   // Get the number of bytes in the device input buffer
 	} while ((dwNumBytesToRead == 0) && (ftStatus == FT_OK));						   // or Timeout
 	ftStatus |= FT_Read(_ftHandle, &byInputBuffer, dwNumBytesToRead, &dwNumBytesRead); // Read out the data from input buffer
+	*/
 
 	// Shift out AHB data DWORD (1 byte)
 	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
@@ -1432,12 +1441,12 @@ void FTDIDevice::iowrite8(DWORD addr, BYTE data)
 
 void FTDIDevice::iowrite16(DWORD addr, WORD data)
 {
-	BYTE byOutputBuffer[100];	// Buffer to hold MPSSE commands and data to be sent to the FT2232H
-	BYTE byInputBuffer[100];	// Buffer to hold data read from the FT2232H
+	BYTE byOutputBuffer[100]; // Buffer to hold MPSSE commands and data to be sent to the FT2232H
+	// BYTE byInputBuffer[100];	// Buffer to hold data read from the FT2232H
 	DWORD dwNumBytesToSend = 0; // Index to the output buffer
 	DWORD dwNumBytesSent = 0;	// Count of actual bytes sent - used with FT_Write
-	DWORD dwNumBytesToRead = 0; // Number of bytes available to read in the driver's input buffer
-	DWORD dwNumBytesRead = 0;	// Count of actual bytes read - used with FT_Read
+	// DWORD dwNumBytesToRead = 0; // Number of bytes available to read in the driver's input buffer
+	// DWORD dwNumBytesRead = 0;	// Count of actual bytes read - used with FT_Read
 
 	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
 	{
@@ -1464,11 +1473,13 @@ void FTDIDevice::iowrite16(DWORD addr, WORD data)
 	byOutputBuffer[dwNumBytesToSend++] = 0x03;		 // Number of clock pulses = Length + 1 (4 clocks here)
 	byOutputBuffer[dwNumBytesToSend++] = 0b00000011; // Data is shifted LSB first, so the TMS pattern is 1100
 
+	/*
 	// Clock out 10 x 8 bits of 0s only to clear out any other values
+	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
+	byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
+	byOutputBuffer[dwNumBytesToSend++] = 0x00;
 	for (BYTE i = 0; i < 10; i++)
 	{
-		byOutputBuffer[dwNumBytesToSend++] = 0x1B; // Clock bits out without read
-		byOutputBuffer[dwNumBytesToSend++] = 0x07; // Length + 1 (8 bits here)
 		byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
 	}
 	// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
@@ -1489,6 +1500,7 @@ void FTDIDevice::iowrite16(DWORD addr, WORD data)
 		ftStatus = FT_GetQueueStatus(_ftHandle, &dwNumBytesToRead);					   // Get the number of bytes in the device input buffer
 	} while ((dwNumBytesToRead == 0) && (ftStatus == FT_OK));						   // or Timeout
 	ftStatus |= FT_Read(_ftHandle, &byInputBuffer, dwNumBytesToRead, &dwNumBytesRead); // Read out the data from input buffer
+	*/
 
 	// Shift out AHB address DWORD (4 bytes)
 	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
@@ -1506,10 +1518,10 @@ void FTDIDevice::iowrite16(DWORD addr, WORD data)
 	byOutputBuffer[dwNumBytesToSend++] = RW_WORD; // Write 16-bit WORD
 
 	// Shift out 1-bit Read/Write Instruction: 0x1 for WRITE while simultaneously leaving Shift-DR via TMS Exit-DR
-	byOutputBuffer[dwNumBytesToSend++] = 0x4B;										   // Clock bits out with read
-	byOutputBuffer[dwNumBytesToSend++] = 0x00;										   // Length + 1 (1 bits here)
-	byOutputBuffer[dwNumBytesToSend++] = 0b10000001;								   // Ones only
-	ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
+	byOutputBuffer[dwNumBytesToSend++] = 0x4B;													 // Clock bits out with read
+	byOutputBuffer[dwNumBytesToSend++] = 0x00;													 // Length + 1 (1 bits here)
+	byOutputBuffer[dwNumBytesToSend++] = 0b10000001;											 // Ones only
+	FT_STATUS ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
 
 	if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
 	{
@@ -1546,11 +1558,13 @@ void FTDIDevice::iowrite16(DWORD addr, WORD data)
 	}
 	dwNumBytesToSend = 0; // Reset output buffer pointer
 
+	/*
 	// Clock out 10 x 8 bits of 0s only to clear out any other values
+	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
+	byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
+	byOutputBuffer[dwNumBytesToSend++] = 0x00;
 	for (BYTE i = 0; i < 10; i++)
 	{
-		byOutputBuffer[dwNumBytesToSend++] = 0x1B; // Clock bits out without read
-		byOutputBuffer[dwNumBytesToSend++] = 0x07; // Length + 1 (8 bits here)
 		byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
 	}
 	// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
@@ -1571,6 +1585,7 @@ void FTDIDevice::iowrite16(DWORD addr, WORD data)
 		ftStatus = FT_GetQueueStatus(_ftHandle, &dwNumBytesToRead);					   // Get the number of bytes in the device input buffer
 	} while ((dwNumBytesToRead == 0) && (ftStatus == FT_OK));						   // or Timeout
 	ftStatus |= FT_Read(_ftHandle, &byInputBuffer, dwNumBytesToRead, &dwNumBytesRead); // Read out the data from input buffer
+	*/
 
 	// Shift out AHB data WORD (2 bytes)
 	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
@@ -1615,12 +1630,12 @@ void FTDIDevice::iowrite16(DWORD addr, WORD data)
 
 void FTDIDevice::iowrite32(DWORD addr, DWORD data)
 {
-	BYTE byOutputBuffer[100];	// Buffer to hold MPSSE commands and data to be sent to the FT2232H
-	BYTE byInputBuffer[100];	// Buffer to hold data read from the FT2232H
+	BYTE byOutputBuffer[100]; // Buffer to hold MPSSE commands and data to be sent to the FT2232H
+	// BYTE byInputBuffer[100];	// Buffer to hold data read from the FT2232H
 	DWORD dwNumBytesToSend = 0; // Index to the output buffer
 	DWORD dwNumBytesSent = 0;	// Count of actual bytes sent - used with FT_Write
-	DWORD dwNumBytesToRead = 0; // Number of bytes available to read in the driver's input buffer
-	DWORD dwNumBytesRead = 0;	// Count of actual bytes read - used with FT_Read
+	// DWORD dwNumBytesToRead = 0; // Number of bytes available to read in the driver's input buffer
+	// DWORD dwNumBytesRead = 0;	// Count of actual bytes read - used with FT_Read
 
 	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
 	{
@@ -1647,11 +1662,13 @@ void FTDIDevice::iowrite32(DWORD addr, DWORD data)
 	byOutputBuffer[dwNumBytesToSend++] = 0x03;		 // Number of clock pulses = Length + 1 (4 clocks here)
 	byOutputBuffer[dwNumBytesToSend++] = 0b00000011; // Data is shifted LSB first, so the TMS pattern is 1100
 
+	/*
 	// Clock out 10 x 8 bits of 0s only to clear out any other values
+	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
+	byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
+	byOutputBuffer[dwNumBytesToSend++] = 0x00;
 	for (BYTE i = 0; i < 10; i++)
 	{
-		byOutputBuffer[dwNumBytesToSend++] = 0x1B; // Clock bits out without read
-		byOutputBuffer[dwNumBytesToSend++] = 0x07; // Length + 1 (8 bits here)
 		byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
 	}
 	// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
@@ -1672,6 +1689,7 @@ void FTDIDevice::iowrite32(DWORD addr, DWORD data)
 		ftStatus = FT_GetQueueStatus(_ftHandle, &dwNumBytesToRead);					   // Get the number of bytes in the device input buffer
 	} while ((dwNumBytesToRead == 0) && (ftStatus == FT_OK));						   // or Timeout
 	ftStatus |= FT_Read(_ftHandle, &byInputBuffer, dwNumBytesToRead, &dwNumBytesRead); // Read out the data from input buffer
+	*/
 
 	// Shift out AHB address DWORD (4 bytes)
 	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
@@ -1689,10 +1707,10 @@ void FTDIDevice::iowrite32(DWORD addr, DWORD data)
 	byOutputBuffer[dwNumBytesToSend++] = RW_DWORD; // Write 32-bit DWORD
 
 	// Shift out 1-bit Read/Write Instruction: 0x1 for WRITE while simultaneously leaving Shift-DR via TMS Exit-DR
-	byOutputBuffer[dwNumBytesToSend++] = 0x4B;										   // Clock bits out with read
-	byOutputBuffer[dwNumBytesToSend++] = 0x00;										   // Length + 1 (1 bits here)
-	byOutputBuffer[dwNumBytesToSend++] = 0b10000001;								   // Ones only
-	ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
+	byOutputBuffer[dwNumBytesToSend++] = 0x4B;													 // Clock bits out with read
+	byOutputBuffer[dwNumBytesToSend++] = 0x00;													 // Length + 1 (1 bits here)
+	byOutputBuffer[dwNumBytesToSend++] = 0b10000001;											 // Ones only
+	FT_STATUS ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
 
 	if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
 	{
@@ -1729,11 +1747,13 @@ void FTDIDevice::iowrite32(DWORD addr, DWORD data)
 	}
 	dwNumBytesToSend = 0; // Reset output buffer pointer
 
+	/*
 	// Clock out 10 x 8 bits of 0s only to clear out any other values
+	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
+	byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
+	byOutputBuffer[dwNumBytesToSend++] = 0x00;
 	for (BYTE i = 0; i < 10; i++)
 	{
-		byOutputBuffer[dwNumBytesToSend++] = 0x1B; // Clock bits out without read
-		byOutputBuffer[dwNumBytesToSend++] = 0x07; // Length + 1 (8 bits here)
 		byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
 	}
 	// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
@@ -1754,6 +1774,7 @@ void FTDIDevice::iowrite32(DWORD addr, DWORD data)
 		ftStatus = FT_GetQueueStatus(_ftHandle, &dwNumBytesToRead);					   // Get the number of bytes in the device input buffer
 	} while ((dwNumBytesToRead == 0) && (ftStatus == FT_OK));						   // or Timeout
 	ftStatus |= FT_Read(_ftHandle, &byInputBuffer, dwNumBytesToRead, &dwNumBytesRead); // Read out the data from input buffer
+	*/
 
 	// Shift out AHB data DWORD (4 bytes)
 	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
@@ -1796,12 +1817,12 @@ void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progres
 		cout << "Writing data to memory... " << flush;
 	}
 
-	BYTE byOutputBuffer[100];	// Buffer to hold MPSSE commands and data to be sent to the FT2232H
-	BYTE byInputBuffer[100];	// Buffer to hold data read from the FT2232H
+	BYTE byOutputBuffer[100]; // Buffer to hold MPSSE commands and data to be sent to the FT2232H
+	// BYTE byInputBuffer[100];	// Buffer to hold data read from the FT2232H
 	DWORD dwNumBytesToSend = 0; // Index to the output buffer
 	DWORD dwNumBytesSent = 0;	// Count of actual bytes sent - used with FT_Write
-	DWORD dwNumBytesToRead = 0; // Number of bytes available to read in the driver's input buffer
-	DWORD dwNumBytesRead = 0;	// Count of actual bytes read - used with FT_Read
+	// DWORD dwNumBytesToRead = 0; // Number of bytes available to read in the driver's input buffer
+	// DWORD dwNumBytesRead = 0;	// Count of actual bytes read - used with FT_Read
 
 	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
 	{
@@ -1828,11 +1849,13 @@ void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progres
 	byOutputBuffer[dwNumBytesToSend++] = 0x03;		 // Number of clock pulses = Length + 1 (4 clocks here)
 	byOutputBuffer[dwNumBytesToSend++] = 0b00000011; // Data is shifted LSB first, so the TMS pattern is 1100
 
+	/*
 	// Clock out 10 x 8 bits of 0s only to clear out any other values
+	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
+	byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
+	byOutputBuffer[dwNumBytesToSend++] = 0x00;
 	for (BYTE i = 0; i < 10; i++)
 	{
-		byOutputBuffer[dwNumBytesToSend++] = 0x1B; // Clock bits out without read
-		byOutputBuffer[dwNumBytesToSend++] = 0x07; // Length + 1 (8 bits here)
 		byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
 	}
 	// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
@@ -1853,6 +1876,7 @@ void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progres
 		ftStatus = FT_GetQueueStatus(_ftHandle, &dwNumBytesToRead);					   // Get the number of bytes in the device input buffer
 	} while ((dwNumBytesToRead == 0) && (ftStatus == FT_OK));						   // or Timeout
 	ftStatus |= FT_Read(_ftHandle, &byInputBuffer, dwNumBytesToRead, &dwNumBytesRead); // Read out the data from input buffer
+	*/
 
 	// Shift out AHB address DWORD (4 bytes)
 	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
@@ -1870,10 +1894,10 @@ void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progres
 	byOutputBuffer[dwNumBytesToSend++] = RW_DWORD; // Zeros only
 
 	// Shift out 1-bit Read/Write Instruction: 0x1 for WRITE while simultaneously leaving Shift-DR via TMS Exit-DR
-	byOutputBuffer[dwNumBytesToSend++] = 0x4B;										   // Clock bits out with read
-	byOutputBuffer[dwNumBytesToSend++] = 0x00;										   // Length + 1 (1 bits here)
-	byOutputBuffer[dwNumBytesToSend++] = 0b10000001;								   // Ones only
-	ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
+	byOutputBuffer[dwNumBytesToSend++] = 0x4B;													 // Clock bits out with read
+	byOutputBuffer[dwNumBytesToSend++] = 0x00;													 // Length + 1 (1 bits here)
+	byOutputBuffer[dwNumBytesToSend++] = 0b10000001;											 // Ones only
+	FT_STATUS ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
 
 	if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
 	{
@@ -1918,16 +1942,18 @@ void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progres
 			cout << "\rWriting data to memory... " << dec << (unsigned int)((i + 1) / (float)size * 100.0) << "%  " << flush;
 		}
 
+		/*
 		// Clock out 10 x 8 bits of 0s only to clear out any other values
-		for (BYTE j = 0; j < 10; j++)
+		byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
+		byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
+		byOutputBuffer[dwNumBytesToSend++] = 0x00;
+		for (BYTE i = 0; i < 10; i++)
 		{
-			byOutputBuffer[dwNumBytesToSend++] = 0x1B; // Clock bits out without read
-			byOutputBuffer[dwNumBytesToSend++] = 0x07; // Length + 1 (8 bits here)
 			byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
 		}
 		// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
-		byOutputBuffer[dwNumBytesToSend++] = 0x2A;										   // Read back bits
-		byOutputBuffer[dwNumBytesToSend++] = 0x07;										   // Length + 1 (8 bits here)
+		byOutputBuffer[dwNumBytesToSend++] = 0x2A;													 // Read back bits
+		byOutputBuffer[dwNumBytesToSend++] = 0x07;													 // Length + 1 (8 bits here)
 		ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
 
 		if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
@@ -1943,6 +1969,7 @@ void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progres
 			ftStatus = FT_GetQueueStatus(_ftHandle, &dwNumBytesToRead);					   // Get the number of bytes in the device input buffer
 		} while ((dwNumBytesToRead == 0) && (ftStatus == FT_OK));						   // or Timeout
 		ftStatus |= FT_Read(_ftHandle, &byInputBuffer, dwNumBytesToRead, &dwNumBytesRead); // Read out the data from input buffer
+		*/
 
 		DWORD dataWord = data[i];
 
@@ -1957,17 +1984,9 @@ void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progres
 		byOutputBuffer[dwNumBytesToSend++] = ((dataWord >> 24) & 0xFF); // Last Byte of DWORD data
 
 		// Shift out 1-bit SEQ Transfer Instruction: 0x1 for sequential WRITE while simultaneously leaving Shift-DR via TMS Exit-DR
-		byOutputBuffer[dwNumBytesToSend++] = 0x4B;										   // Clock bits out with read
-		byOutputBuffer[dwNumBytesToSend++] = 0x00;										   // Length + 1 (1 bits here)
-		byOutputBuffer[dwNumBytesToSend++] = 0b10000001;								   // Ones only
-		ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
-
-		if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
-		{
-			cerr << "Error while shifting out data for device " << _deviceIndex << endl;
-			return;
-		}
-		dwNumBytesToSend = 0; // Reset output buffer pointer
+		byOutputBuffer[dwNumBytesToSend++] = 0x4B;		 // Clock bits out with read
+		byOutputBuffer[dwNumBytesToSend++] = 0x00;		 // Length + 1 (1 bits here)
+		byOutputBuffer[dwNumBytesToSend++] = 0b10000001; // Ones only
 
 		// Loop around once through Update-DR and then go back to Shift-DR
 		byOutputBuffer[dwNumBytesToSend++] = 0x4B;										   // Clock bits out without read
