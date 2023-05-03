@@ -33,6 +33,8 @@ private:
 	FT_STATUS _initMPSSEMode();
 	FT_STATUS _resetJTAGStateMachine();
 
+	void _initDSU();
+
 public:
 	FTDIDevice();  // Constructor
 	~FTDIDevice(); // Destructor

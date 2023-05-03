@@ -94,6 +94,8 @@ void FTDIDevice::getDeviceList()
 FT_STATUS FTDIDevice::open(DWORD deviceIndex)
 {
 	_deviceIndex = deviceIndex;
+
+	// Open FTDI device handle
 	FT_STATUS ftStatus = FT_Open(deviceIndex, &_ftHandle);
 	if (ftStatus != FT_OK)
 	{
@@ -101,23 +103,16 @@ FT_STATUS FTDIDevice::open(DWORD deviceIndex)
 		return ftStatus;
 	}
 
-	// Get driver version
+	// Get chip driver version
 	DWORD dwDriverVer;
+	ftStatus = FT_GetDriverVersion(_ftHandle, &dwDriverVer);
 	if (ftStatus == FT_OK)
 	{
-		ftStatus = FT_GetDriverVersion(_ftHandle, &dwDriverVer);
-		if (ftStatus == FT_OK)
-		{
-			unsigned long majorVer = (dwDriverVer >> 16) & 0xFF;
-			unsigned long minorVer = (dwDriverVer >> 8) & 0xFF;
-			unsigned long buildVer = dwDriverVer & 0xFF;
+		unsigned long majorVer = (dwDriverVer >> 16) & 0xFF;
+		unsigned long minorVer = (dwDriverVer >> 8) & 0xFF;
+		unsigned long buildVer = dwDriverVer & 0xFF;
 
-			cout << "Device driver version: " << hex << majorVer << "." << minorVer << "." << buildVer << endl;
-		}
-		else
-		{
-			cerr << "Error reading driver version" << endl;
-		}
+		cout << "Device driver version: " << hex << majorVer << "." << minorVer << "." << buildVer << endl;
 	}
 	else
 	{
@@ -132,45 +127,14 @@ FT_STATUS FTDIDevice::open(DWORD deviceIndex)
 		return ftStatus;
 	}
 
-	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
+	ftStatus = _resetJTAGStateMachine();
+	if (ftStatus != FT_OK)
 	{
-		return 0;
+		cerr << "Could not reset JTAG state machine on device " << deviceIndex << endl;
+		return ftStatus;
 	}
 
-	// DSU INIT SEQUENCE TAKEN FROM setup.c: sxi_dpu_setup_cpu_entry()
-
-	/* XXX this is needed for SXI DPU; the boot sw cannot start
-	 * in SMP mode, so the second CPU is still at 0x0 initially
-	 *
-	 * we temporarily do this here to get ready for the EMC test
-	 *
-	 * we use the LEON3 debug support unit for this
-	 */
-	uint32_t tmp;
-
-	dsu_set_noforce_debug_mode(1);
-	dsu_set_cpu_break_on_iu_watchpoint(1);
-
-	dsu_set_force_debug_on_watchpoint(1);
-
-	// set trap base register to be the same as on CPU0 and point %pc and %npc there
-	tmp = dsu_get_reg_tbr(0) & ~0xfff;
-
-	dsu_set_reg_tbr(1, tmp);
-
-	dsu_set_reg_pc(1, tmp);
-	dsu_set_reg_npc(1, tmp + 0x4);
-
-	dsu_clear_iu_reg_file(1);
-	// default invalid mask
-	dsu_set_reg_wim(1, 0x2);
-
-	// set CWP to 7
-	dsu_set_reg_psr(1, 0xf34010e1);
-
-	dsu_clear_cpu_break_on_iu_watchpoint(1);
-	// resume cpu 1
-	dsu_clear_force_debug_on_watchpoint(1);
+	_initDSU(); // Initialize the debug support unit
 
 	return ftStatus;
 }
@@ -182,7 +146,7 @@ FT_STATUS FTDIDevice::_initMPSSEMode()
 		Configure port for MPSSE use
 		============================
 	*/
-	cout << "Configuring port... ";
+	cout << "Configuring port... " << flush;
 
 	// Reset the FTDI chip
 	FT_STATUS ftStatus = FT_ResetDevice(_ftHandle);
@@ -251,7 +215,7 @@ FT_STATUS FTDIDevice::_initMPSSEMode()
 
 	sleep(1); // Wait for all the USB stuff to complete and work, 1s
 	cout << "done!" << endl;
-	cout << "Configuring MPSSE... ";
+	cout << "Configuring MPSSE... " << flush;
 
 	/*
 		===============
@@ -436,6 +400,48 @@ FT_STATUS FTDIDevice::_resetJTAGStateMachine()
 	dwNumBytesToSend = 0; // Reset output buffer pointer
 
 	return ftStatus;
+}
+
+void FTDIDevice::_initDSU()
+{
+	// Initialize the debug support unit for one CPU core
+	// Taken from setup.c: sxi_dpu_setup_cpu_entry()
+	cout << "Configuring DSU... " << flush;
+
+	/* XXX this is needed for SXI DPU; the boot sw cannot start
+	 * in SMP mode, so the second CPU is still at 0x0 initially
+	 *
+	 * we temporarily do this here to get ready for the EMC test
+	 *
+	 * we use the LEON3 debug support unit for this
+	 */
+	uint32_t tmp;
+
+	dsu_set_noforce_debug_mode(1);
+	dsu_set_cpu_break_on_iu_watchpoint(1);
+
+	dsu_set_force_debug_on_watchpoint(1);
+
+	// Set trap base register to be the same as on CPU0 and point %pc and %npc there
+	tmp = dsu_get_reg_tbr(0) & ~0xfff;
+
+	dsu_set_reg_tbr(1, tmp);
+
+	dsu_set_reg_pc(1, tmp);
+	dsu_set_reg_npc(1, tmp + 0x4);
+
+	dsu_clear_iu_reg_file(1);
+	// Default invalid mask
+	dsu_set_reg_wim(1, 0x2);
+
+	// Set CWP to 7
+	dsu_set_reg_psr(1, 0xf34010e1);
+
+	dsu_clear_cpu_break_on_iu_watchpoint(1);
+	// Resume cpu 1
+	dsu_clear_force_debug_on_watchpoint(1);
+
+	cout << "done!" << endl;
 }
 
 BYTE FTDIDevice::getJTAGCount()
@@ -1042,7 +1048,7 @@ void FTDIDevice::ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress
 
 	if (progress) // Optional terminal progress output
 	{
-		cout << "Writing data to memory... ";
+		cout << "Writing data to memory... " << flush;
 	}
 
 	BYTE byOutputBuffer[100];	// Buffer to hold MPSSE commands and data to be sent to the FT2232H
@@ -1163,7 +1169,7 @@ void FTDIDevice::ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress
 	{
 		if (progress) // Optional terminal progress output
 		{
-			cout << "\rReading data from memory... " << dec << (unsigned int)((i + 1) / (float)size * 100.0) << "%      ";
+			cout << "\rReading data from memory... " << dec << (unsigned int)((i + 1) / (float)size * 100.0) << "%  " << flush;
 		}
 
 		// Clock out read command
@@ -1426,8 +1432,6 @@ void FTDIDevice::iowrite8(DWORD addr, BYTE data)
 
 void FTDIDevice::iowrite16(DWORD addr, WORD data)
 {
-	cout << "addr: " << (unsigned long)addr << " data: " << (unsigned long)data << endl;
-
 	BYTE byOutputBuffer[100];	// Buffer to hold MPSSE commands and data to be sent to the FT2232H
 	BYTE byInputBuffer[100];	// Buffer to hold data read from the FT2232H
 	DWORD dwNumBytesToSend = 0; // Index to the output buffer
@@ -1789,7 +1793,7 @@ void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progres
 
 	if (progress) // Optional terminal progress output
 	{
-		cout << "Writing data to memory... ";
+		cout << "Writing data to memory... " << flush;
 	}
 
 	BYTE byOutputBuffer[100];	// Buffer to hold MPSSE commands and data to be sent to the FT2232H
@@ -1911,7 +1915,7 @@ void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progres
 	{
 		if (progress) // Optional terminal progress output
 		{
-			cout << "\rWriting data to memory... " << dec << (unsigned int)((i + 1) / (float)size * 100.0) << "%      ";
+			cout << "\rWriting data to memory... " << dec << (unsigned int)((i + 1) / (float)size * 100.0) << "%  " << flush;
 		}
 
 		// Clock out 10 x 8 bits of 0s only to clear out any other values

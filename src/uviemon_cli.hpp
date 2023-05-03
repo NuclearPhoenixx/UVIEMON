@@ -27,8 +27,8 @@ void mem(FTDIDevice &handle, DWORD startAddr, DWORD length = 16);
 void memh(FTDIDevice &handle, DWORD startAddr, DWORD length = 32);
 void memb(FTDIDevice &handle, DWORD startAddr, DWORD length = 64);
 
-void wash(FTDIDevice &handle, DWORD size = 16); // TODO: More features like grmon!
-void load(FTDIDevice &handle, std::string &path);	  // TODO: Get auto filesize + more features?
+void wash(FTDIDevice &handle, DWORD size = 16);	  // TODO: More features like grmon!
+void load(FTDIDevice &handle, std::string &path); // TODO: Get auto filesize + more features?
 // void run(FTDIDevice &handle); // TODO: Run Uploaded Executable
 
 #endif /* UVIEMON_CLI_HPP */

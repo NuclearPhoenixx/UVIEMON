@@ -101,21 +101,21 @@ string _hexToString(BYTE *data, size_t size)
 
 void wmem(FTDIDevice &handle, DWORD addr, DWORD data)
 {
-	cout << "Writing to memory... ";
+	cout << "Writing to memory... " << flush;
 	handle.iowrite32(addr, data);
 	cout << "OK!" << endl;
 }
 
 void wmemh(FTDIDevice &handle, DWORD addr, WORD data)
 {
-	cout << "Writing to memory... ";
+	cout << "Writing to memory... " << flush;
 	handle.iowrite16(addr, data);
 	cout << "OK!" << endl;
 }
 
 void wmemb(FTDIDevice &handle, DWORD addr, BYTE data)
 {
-	cout << "Writing to memory... ";
+	cout << "Writing to memory... " << flush;
 	handle.iowrite8(addr, data);
 	cout << "OK!" << endl;
 }
@@ -143,11 +143,11 @@ void mem(FTDIDevice &handle, DWORD startAddr, DWORD length)
 				cout << endl;
 			}
 
-			cout << hex << nouppercase << "0x" << setfill('0') << setw(8) << startAddr << "  ";
+			cout << hex << nouppercase << "0x" << setfill('0') << setw(8) << startAddr << "  " << flush;
 			startAddr += 16;
 		}
 
-		cout << setfill('0') << setw(8) << hex << nouppercase << arr[i] << "  ";
+		cout << setfill('0') << setw(8) << hex << nouppercase << arr[i] << "  " << flush;
 
 		chars[arrayIndex] = arr[i];
 		arrayIndex++;
@@ -185,14 +185,14 @@ void memh(FTDIDevice &handle, DWORD startAddr, DWORD length)
 				cout << endl;
 			}
 
-			cout << hex << nouppercase << "0x" << setfill('0') << setw(8) << addr << "  ";
+			cout << hex << nouppercase << "0x" << setfill('0') << setw(8) << addr << "  " << flush;
 		}
 
 		WORD data = handle.ioread16(addr);
 		arr[arrayIndex] = data;
 		arrayIndex++;
 
-		cout << setfill('0') << setw(4) << hex << nouppercase << data << "  ";
+		cout << setfill('0') << setw(4) << hex << nouppercase << data << "  " << flush;
 
 		index++;
 	}
@@ -229,14 +229,14 @@ void memb(FTDIDevice &handle, DWORD startAddr, DWORD length)
 				cout << endl;
 			}
 
-			cout << hex << nouppercase << "0x" << setfill('0') << setw(8) << addr << "  ";
+			cout << hex << nouppercase << "0x" << setfill('0') << setw(8) << addr << "  " << flush;
 		}
 
 		WORD data = handle.ioread8(addr);
 		arr[arrayIndex] = data;
 		arrayIndex++;
 
-		cout << setfill('0') << setw(2) << hex << nouppercase << data << "  ";
+		cout << setfill('0') << setw(2) << hex << nouppercase << data << "  " << flush;
 
 		index++;
 	}
