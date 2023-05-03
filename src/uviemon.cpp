@@ -443,8 +443,8 @@ int main(int argc, char *argv[])
 		cout << "Number of JTAG devices on chain: " << dec << numberOfJTAGs << endl;
 		cout << "Device IDCODE: 0x" << hex << uppercase << id << endl;
 		cout << "IR length: " << dec << irl << " bits" << endl;
-		cout << "DR Data register length: 0x" << hex << uppercase << CODE_DATA << ", " << dec << length1 << " bits" << endl;
-		cout << "DR Command/Address register: 0x" << hex << uppercase << CODE_ADDR_COMM << ", " << dec << length2 << " bits" << endl;
+		cout << "Data register length: 0x" << hex << uppercase << CODE_DATA << ", " << dec << length1 << " bits" << endl;
+		cout << "Command/Address register length: 0x" << hex << uppercase << CODE_ADDR_COMM << ", " << dec << length2 << " bits" << endl;
 		cout << "OK. Ready!" << endl;
 
 		cout << endl;
