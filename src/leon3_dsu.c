@@ -39,11 +39,11 @@
  *
  */
 
+#include <cstddef>	// size_t
 #include "leon3_dsu.h"
-//#include <kernel/printk.h>
-//#include <asm-generic/io.h>
 #include "ftdi_device_wrapper.hpp" // Updated includes!
 
+#define offset_of(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 
 
 /**
@@ -164,9 +164,9 @@ static void dsu_set_dsu_ctrl(uint32_t cpu, uint32_t flags)
 	uint32_t tmp;
 
 
-	tmp  = ioread32be((void *) (DSU_CTRL + DSU_OFFSET_CPU(cpu)));
+	tmp  = ioread32be((uint32_t) (DSU_CTRL + DSU_OFFSET_CPU(cpu)));
 	tmp |= flags;
-	iowrite32be(tmp,  (void *) (DSU_CTRL + DSU_OFFSET_CPU(cpu)));
+	iowrite32be(tmp,  (uint32_t) (DSU_CTRL + DSU_OFFSET_CPU(cpu)));
 }
 
 
@@ -180,7 +180,7 @@ static void dsu_set_dsu_ctrl(uint32_t cpu, uint32_t flags)
 
 static uint32_t dsu_get_dsu_ctrl(uint32_t cpu)
 {
-	return ioread32be((void *) (DSU_CTRL + DSU_OFFSET_CPU(cpu)));
+	return ioread32be((uint32_t) (DSU_CTRL + DSU_OFFSET_CPU(cpu)));
 }
 
 
@@ -196,9 +196,9 @@ static void dsu_clear_dsu_ctrl(uint32_t cpu, uint32_t flags)
 	uint32_t tmp;
 
 
-	tmp  = ioread32be((void *) (DSU_CTRL + DSU_OFFSET_CPU(cpu)));
+	tmp  = ioread32be((uint32_t) (DSU_CTRL + DSU_OFFSET_CPU(cpu)));
 	tmp &= ~flags;
-	iowrite32be(tmp,  (void *) (DSU_CTRL + DSU_OFFSET_CPU(cpu)));
+	iowrite32be(tmp,  (uint32_t) (DSU_CTRL + DSU_OFFSET_CPU(cpu)));
 }
 
 
@@ -216,7 +216,7 @@ void dsu_clear_iu_reg_file(uint32_t cpu)
 
 
 	for (i = 0; i < iu_reg_size; i += 4)
-		iowrite32be(0x0, (void *) (DSU_OFFSET_CPU(cpu)
+		iowrite32be(0x0, (uint32_t) (DSU_OFFSET_CPU(cpu)
 					   + DSU_IU_REG + i));
 }
 
@@ -234,13 +234,12 @@ void dsu_set_force_enter_debug_mode(uint32_t cpu)
 {
 	uint16_t tmp;
 
-	struct dsu_mode_mask *dmm
-		= (struct dsu_mode_mask *) DSU_MODE_MASK;
+	uint32_t addr = DSU_MODE_MASK + offset_of(struct dsu_mode_mask, enter_debug);
 
 
-	tmp  = ioread16be(&dmm->enter_debug);
+	tmp  = ioread16be(addr);
 	tmp |= (1 << cpu);
-	iowrite16be(tmp, &dmm->enter_debug);
+	iowrite16be(tmp, addr);
 }
 
 
@@ -257,13 +256,12 @@ void dsu_clear_force_enter_debug_mode(uint32_t cpu)
 {
 	uint16_t tmp;
 
-	struct dsu_mode_mask *dmm
-		= (struct dsu_mode_mask *) DSU_MODE_MASK;
+	uint32_t addr = DSU_MODE_MASK + offset_of(struct dsu_mode_mask, enter_debug);
 
 
-	tmp  = ioread16be(&dmm->enter_debug);
+	tmp  = ioread16be(addr);
 	tmp &= ~(1 << cpu);
-	iowrite16be(tmp, &dmm->enter_debug);
+	iowrite16be(tmp, addr);
 }
 
 
@@ -279,13 +277,12 @@ void dsu_set_noforce_debug_mode(uint32_t cpu)
 {
 	uint16_t tmp;
 
-	struct dsu_mode_mask *dmm
-		= (struct dsu_mode_mask *) DSU_MODE_MASK;
+	uint32_t addr = DSU_MODE_MASK + offset_of(struct dsu_mode_mask, debug_mode);
 
 
-	tmp  = ioread16be(&dmm->debug_mode);
+	tmp  = ioread16be(addr);
 	tmp |= (1 << cpu);
-	iowrite16be(tmp, &dmm->debug_mode);
+	iowrite16be(tmp, addr);
 }
 
 
@@ -301,13 +298,12 @@ void dsu_clear_noforce_debug_mode(uint32_t cpu)
 {
 	uint16_t tmp;
 
-	struct dsu_mode_mask *dmm
-		= (struct dsu_mode_mask *) DSU_MODE_MASK;
+	uint32_t addr = DSU_MODE_MASK + offset_of(struct dsu_mode_mask, debug_mode);
 
 
-	tmp  = ioread16be(&dmm->debug_mode);
+	tmp  = ioread16be(addr);
 	tmp &= ~(1 << cpu);
-	iowrite16be(tmp, &dmm->debug_mode);
+	iowrite16be(tmp, addr);
 }
 
 
@@ -324,13 +320,12 @@ void dsu_set_force_debug_on_watchpoint(uint32_t cpu)
 {
 	uint16_t tmp;
 
-	struct dsu_break_step *dbs
-		= (struct dsu_break_step *) DSU_BREAK_STEP;
+	uint32_t addr = DSU_BREAK_STEP + offset_of(struct dsu_break_step, break_now);
 
 
-	tmp  = ioread16be(&dbs->break_now);
+	tmp  = ioread16be(addr);
 	tmp |= (1 << cpu);
-	iowrite16be(tmp, &dbs->break_now);
+	iowrite16be(tmp, addr);
 }
 
 
@@ -348,13 +343,12 @@ void dsu_clear_force_debug_on_watchpoint(uint32_t cpu)
 {
 	uint16_t tmp;
 
-	struct dsu_break_step *dbs
-		= (struct dsu_break_step *) DSU_BREAK_STEP;
+	uint32_t addr = DSU_BREAK_STEP + offset_of(struct dsu_break_step, break_now);
 
 
-	tmp  = ioread16be(&dbs->break_now);
+	tmp  = ioread16be(addr);
 	tmp &= ~(1 << cpu);
-	iowrite16be(tmp, &dbs->break_now);
+	iowrite16be(tmp, addr);
 }
 
 
@@ -570,7 +564,7 @@ void dsu_clear_cpu_break_on_error_trap(uint32_t cpu)
 
 uint32_t dsu_get_reg_y(uint32_t cpu)
 {
-	return ioread32be((void *) (DSU_OFFSET_CPU(cpu) + DSU_REG_Y));
+	return ioread32be((uint32_t) (DSU_OFFSET_CPU(cpu) + DSU_REG_Y));
 }
 
 
@@ -583,7 +577,7 @@ uint32_t dsu_get_reg_y(uint32_t cpu)
 
 void dsu_set_reg_y(uint32_t cpu, uint32_t val)
 {
-	iowrite32be(val, (void *) (DSU_OFFSET_CPU(cpu) + DSU_REG_Y));
+	iowrite32be(val, (uint32_t) (DSU_OFFSET_CPU(cpu) + DSU_REG_Y));
 }
 
 
@@ -597,7 +591,7 @@ void dsu_set_reg_y(uint32_t cpu, uint32_t val)
 
 uint32_t dsu_get_reg_psr(uint32_t cpu)
 {
-	return ioread32be((void *) (DSU_OFFSET_CPU(cpu) + DSU_REG_PSR));
+	return ioread32be((uint32_t) (DSU_OFFSET_CPU(cpu) + DSU_REG_PSR));
 }
 
 
@@ -610,7 +604,7 @@ uint32_t dsu_get_reg_psr(uint32_t cpu)
 
 void dsu_set_reg_psr(uint32_t cpu, uint32_t val)
 {
-	iowrite32be(val, (void *) (DSU_OFFSET_CPU(cpu) + DSU_REG_PSR));
+	iowrite32be(val, (uint32_t) (DSU_OFFSET_CPU(cpu) + DSU_REG_PSR));
 }
 
 
@@ -624,7 +618,7 @@ void dsu_set_reg_psr(uint32_t cpu, uint32_t val)
 
 uint32_t dsu_get_reg_wim(uint32_t cpu)
 {
-	return ioread32be((void *) (DSU_OFFSET_CPU(cpu) + DSU_REG_WIM));
+	return ioread32be((uint32_t) (DSU_OFFSET_CPU(cpu) + DSU_REG_WIM));
 }
 
 
@@ -637,7 +631,7 @@ uint32_t dsu_get_reg_wim(uint32_t cpu)
 
 void dsu_set_reg_wim(uint32_t cpu, uint32_t val)
 {
-	iowrite32be(val, (void *) (DSU_OFFSET_CPU(cpu) + DSU_REG_WIM));
+	iowrite32be(val, (uint32_t) (DSU_OFFSET_CPU(cpu) + DSU_REG_WIM));
 }
 
 
@@ -651,7 +645,7 @@ void dsu_set_reg_wim(uint32_t cpu, uint32_t val)
 
 uint32_t dsu_get_reg_tbr(uint32_t cpu)
 {
-	return ioread32be((void *) (DSU_OFFSET_CPU(cpu) + DSU_REG_TBR));
+	return ioread32be((uint32_t) (DSU_OFFSET_CPU(cpu) + DSU_REG_TBR));
 }
 
 
@@ -664,7 +658,7 @@ uint32_t dsu_get_reg_tbr(uint32_t cpu)
 
 void dsu_set_reg_tbr(uint32_t cpu, uint32_t val)
 {
-	iowrite32be(val, (void *) (DSU_OFFSET_CPU(cpu) + DSU_REG_TBR));
+	iowrite32be(val, (uint32_t) (DSU_OFFSET_CPU(cpu) + DSU_REG_TBR));
 }
 
 
@@ -678,7 +672,7 @@ void dsu_set_reg_tbr(uint32_t cpu, uint32_t val)
 
 uint32_t dsu_get_reg_pc(uint32_t cpu)
 {
-	return ioread32be((void *) (DSU_OFFSET_CPU(cpu) + DSU_REG_PC));
+	return ioread32be((uint32_t) (DSU_OFFSET_CPU(cpu) + DSU_REG_PC));
 }
 
 
@@ -691,7 +685,7 @@ uint32_t dsu_get_reg_pc(uint32_t cpu)
 
 void dsu_set_reg_pc(uint32_t cpu, uint32_t val)
 {
-	iowrite32be(val, (void *) (DSU_OFFSET_CPU(cpu) + DSU_REG_PC));
+	iowrite32be(val, (uint32_t) (DSU_OFFSET_CPU(cpu) + DSU_REG_PC));
 }
 
 
@@ -705,7 +699,7 @@ void dsu_set_reg_pc(uint32_t cpu, uint32_t val)
 
 uint32_t dsu_get_reg_npc(uint32_t cpu)
 {
-	return ioread32be((void *) (DSU_OFFSET_CPU(cpu) + DSU_REG_NPC));
+	return ioread32be((uint32_t) (DSU_OFFSET_CPU(cpu) + DSU_REG_NPC));
 }
 
 
@@ -718,7 +712,7 @@ uint32_t dsu_get_reg_npc(uint32_t cpu)
 
 void dsu_set_reg_npc(uint32_t cpu, uint32_t val)
 {
-	iowrite32be(val, (void *) (DSU_OFFSET_CPU(cpu) + DSU_REG_NPC));
+	iowrite32be(val, (uint32_t) (DSU_OFFSET_CPU(cpu) + DSU_REG_NPC));
 }
 
 
@@ -732,7 +726,7 @@ void dsu_set_reg_npc(uint32_t cpu, uint32_t val)
 
 uint32_t dsu_get_reg_fsr(uint32_t cpu)
 {
-	return ioread32be((void *) (DSU_OFFSET_CPU(cpu) + DSU_REG_FSR));
+	return ioread32be((uint32_t) (DSU_OFFSET_CPU(cpu) + DSU_REG_FSR));
 }
 
 
@@ -745,7 +739,7 @@ uint32_t dsu_get_reg_fsr(uint32_t cpu)
 
 void dsu_set_reg_fsr(uint32_t cpu, uint32_t val)
 {
-	iowrite32be(val, (void *) (DSU_OFFSET_CPU(cpu) + DSU_REG_FSR));
+	iowrite32be(val, (uint32_t) (DSU_OFFSET_CPU(cpu) + DSU_REG_FSR));
 }
 
 
@@ -759,7 +753,7 @@ void dsu_set_reg_fsr(uint32_t cpu, uint32_t val)
 
 uint32_t dsu_get_reg_cpsr(uint32_t cpu)
 {
-	return ioread32be((void *) (DSU_OFFSET_CPU(cpu) + DSU_REG_CPSR));
+	return ioread32be((uint32_t) (DSU_OFFSET_CPU(cpu) + DSU_REG_CPSR));
 }
 
 /**
@@ -771,7 +765,7 @@ uint32_t dsu_get_reg_cpsr(uint32_t cpu)
 
 void dsu_set_reg_cpsr(uint32_t cpu, uint32_t val)
 {
-	iowrite32be(val, (void *) (DSU_OFFSET_CPU(cpu) + DSU_REG_CPSR));
+	iowrite32be(val, (uint32_t) (DSU_OFFSET_CPU(cpu) + DSU_REG_CPSR));
 }
 
 /**
@@ -789,7 +783,7 @@ void dsu_set_reg_sp(uint32_t cpu, uint32_t cwp, uint32_t val)
 	reg = dsu_get_output_reg_addr(cpu, 6, cwp);
 
 	if (reg)
-		iowrite32be(val, (void *) reg);
+		iowrite32be(val, (uint32_t) reg);
 }
 
 
@@ -808,7 +802,7 @@ uint32_t dsu_get_reg_sp(uint32_t cpu, uint32_t cwp)
 	reg = dsu_get_output_reg_addr(cpu, 6, cwp);
 
 	if (reg)
-		return ioread32be((void *) reg);
+		return ioread32be((uint32_t) reg);
 	else
 		return 0;
 }
@@ -829,5 +823,5 @@ void dsu_set_reg_fp(uint32_t cpu, uint32_t cwp, uint32_t val)
 	reg = dsu_get_input_reg_addr(cpu, 6, cwp);
 
 	if (reg)
-		iowrite32be(val, (void *) reg);
+		iowrite32be(val, (uint32_t) reg);
 }

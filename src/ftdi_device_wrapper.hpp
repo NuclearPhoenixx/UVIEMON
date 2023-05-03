@@ -19,10 +19,10 @@ extern "C"
 
 	void pr_err(const char *output);
 
-	void iowrite16be(uint16_t data, void *addr); // SEGFAULTS!
-	void iowrite32be(uint32_t data, void *addr); // SEGFAULTS!
-	uint16_t ioread16be(void *addr);			 // SEGFAULTS!
-	uint32_t ioread32be(void *addr);			 // SEGFAULTS!
+	void iowrite16be(uint16_t data, uint32_t addr);
+	void iowrite32be(uint32_t data, uint32_t addr);
+	uint16_t ioread16be(uint32_t addr);
+	uint32_t ioread32be(uint32_t addr);
 
 #ifdef __cplusplus
 }
