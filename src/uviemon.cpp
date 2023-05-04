@@ -77,15 +77,16 @@ void console()
 			cout << "  help: \t This list of all available commands" << endl;
 			cout << "  scan: \t Scan for all possible IR opcodes" << endl;
 			cout << endl;
-			cout << "  mem: \t\t Read <length#2> 32-bit DWORDs from a starting address <address#1> out of the memory" << endl;
-			cout << "  memh: \t Read <length#2> 16-bit WORDs from a starting address <address#1> out of the memory" << endl;
-			cout << "  memb: \t Read <length#2> 8-bit BYTEs from a starting address <address#1> out of the memory" << endl;
-			cout << "  wmem: \t Write <data#2> 32-bit DWORD to a memory address <address#1>" << endl;
-			cout << "  wmemh: \t Write <data#2> 16-bit WORD to a memory address <address#1>" << endl;
-			cout << "  wmemb: \t Write <data#2> 8-bit BYTE to a memory address <address#1>" << endl;
+			cout << "  mem: \t\t Read <length#2> 32-bit DWORDs from a starting <address#1> out of the memory" << endl;
+			cout << "  memh: \t Read <length#2> 16-bit WORDs from a starting <address#1> out of the memory" << endl;
+			cout << "  memb: \t Read <length#2> 8-bit BYTEs from a starting <address#1> out of the memory" << endl;
+			cout << "  wmem: \t Write <data#2> 32-bit DWORD to a memory <address#1>" << endl;
+			cout << "  wmemh: \t Write <data#2> 16-bit WORD to a memory <address#1>" << endl;
+			cout << "  wmemb: \t Write <data#2> 8-bit BYTE to a memory <address#1>" << endl;
 			cout << endl;
-			cout << "  load: \t Write a file with path <filePath#1> to the device memory" << endl;
-			cout << "  wash: \t Wash memory with a certain BYTE length <length#1> of zeros" << endl;
+			cout << "  load: \t Write a file with <filePath#1> to the device memory" << endl;
+			cout << "  verify: \t Verify a file written to the device memory with <filePath#1>" << endl;
+			cout << "  wash: \t Wash memory with a certain DWORD <length#1> of hex DWORD <characters#3> starting at an <address#2>" << endl;
 			cout << endl;
 			cout << "  exit: \t Exit uviemon" << endl;
 		}
@@ -253,9 +254,20 @@ void console()
 				cerr << "Missing argument <filePath#1>..." << endl;
 			}
 		}
-		else if (words[0] == "wash")
+		else if (words[0] == "verify")
 		{
 			if (inputWords >= 2)
+			{
+				verify(device, words[1]);
+			}
+			else
+			{
+				cerr << "Missing argument <filePath#1>..." << endl;
+			}
+		}
+		else if (words[0] == "wash")
+		{
+			if (inputWords == 2)
 			{
 				DWORD length;
 
@@ -275,6 +287,54 @@ void console()
 				}
 
 				wash(device, length);
+			}
+			else if (inputWords == 3)
+			{
+				DWORD length;
+				DWORD addr;
+
+				try // Check if user input is an integer
+				{
+					length = stoul(words[1]);
+					addr = stoul(words[2], nullptr, 16);
+				}
+				catch (invalid_argument const &e)
+				{
+					cerr << "Length/address is not a number!" << endl;
+					continue;
+				}
+				catch (out_of_range const &e)
+				{
+					cerr << "Length/address is out of range for a DWORD!" << endl;
+					continue;
+				}
+
+				wash(device, length, addr);
+			}
+			else if (inputWords >= 4)
+			{
+				DWORD length;
+				DWORD addr;
+				DWORD c;
+
+				try // Check if user input is an integer
+				{
+					length = stoul(words[1]);
+					addr = stoul(words[2], nullptr, 16);
+					c = stoul(words[3], nullptr, 16);
+				}
+				catch (invalid_argument const &e)
+				{
+					cerr << "Length/address/character is not a number!" << endl;
+					continue;
+				}
+				catch (out_of_range const &e)
+				{
+					cerr << "Length/address/character is out of range for a DWORD!" << endl;
+					continue;
+				}
+
+				wash(device, length, addr, c);
 			}
 			else
 			{
