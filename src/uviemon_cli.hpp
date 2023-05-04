@@ -27,8 +27,8 @@ void mem(FTDIDevice &handle, DWORD startAddr, DWORD length = 16);
 void memh(FTDIDevice &handle, DWORD startAddr, DWORD length = 32);
 void memb(FTDIDevice &handle, DWORD startAddr, DWORD length = 64);
 
-void wash(FTDIDevice &handle, WORD size = 16, DWORD addr = 0x40000000, DWORD c = 0); // Doesn't work correctly for >1024B due to ioread32...
-void load(FTDIDevice &handle, std::string &path);									 // Doesn't work correctly for >1024B due to ioread32...
+void wash(FTDIDevice &handle, WORD size = 16, DWORD addr = 0x40000000, DWORD c = 0);
+void load(FTDIDevice &handle, std::string &path); // CHECK IF BINARIES ARE UPLOADED CORRECTLY!
 void verify(FTDIDevice &handle, std::string &path);
 // void run(FTDIDevice &handle); // TODO: Run Uploaded Executable
 

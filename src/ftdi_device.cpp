@@ -2008,10 +2008,13 @@ void FTDIDevice::iowrite32raw(DWORD startAddr, DWORD *data, WORD size)
 		byOutputBuffer[dwNumBytesToSend++] = 0x00;		 // Length + 1 (1 bits here)
 		byOutputBuffer[dwNumBytesToSend++] = 0b10000001; // Only 1 to leave Shift-DR with SEQ Bit
 
-		// Loop around once through Update-DR and then go back to Shift-DR
-		byOutputBuffer[dwNumBytesToSend++] = 0x4B;										   // Clock bits out without read
-		byOutputBuffer[dwNumBytesToSend++] = 0x03;										   // Length + 1 (3 bits here)
-		byOutputBuffer[dwNumBytesToSend++] = 0b00000011;								   // 1100
+		if (i < size - 1) // Fixes an issue with subsequent _resetJTAGStateMachine clocking out another data point
+		{
+			// Loop around once through Update-DR and then go back to Shift-DR
+			byOutputBuffer[dwNumBytesToSend++] = 0x4B;		 // Clock bits out without read
+			byOutputBuffer[dwNumBytesToSend++] = 0x03;		 // Length + 1 (3 bits here)
+			byOutputBuffer[dwNumBytesToSend++] = 0b00000011; // 1100
+		}
 		ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
 
 		if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
