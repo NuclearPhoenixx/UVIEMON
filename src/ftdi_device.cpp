@@ -1916,7 +1916,7 @@ void FTDIDevice::iowrite32raw(DWORD startAddr, DWORD *data, WORD size)
 	// Shift out 2-bit AHB transfer size: 10 for WORD
 	byOutputBuffer[dwNumBytesToSend++] = 0x1B;	   // Clock bits out without read
 	byOutputBuffer[dwNumBytesToSend++] = 0x01;	   // Length + 1 (2 bits here)
-	byOutputBuffer[dwNumBytesToSend++] = RW_DWORD; // Zeros only
+	byOutputBuffer[dwNumBytesToSend++] = RW_DWORD; // Write 32-bit DWORD
 
 	// Shift out 1-bit Read/Write Instruction: 0x1 for WRITE while simultaneously leaving Shift-DR via TMS Exit-DR
 	byOutputBuffer[dwNumBytesToSend++] = 0x4B;													 // Clock bits out with read
@@ -1926,7 +1926,7 @@ void FTDIDevice::iowrite32raw(DWORD startAddr, DWORD *data, WORD size)
 
 	if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
 	{
-		cerr << "Error while shifting out write command for device " << _deviceIndex << endl;
+		cerr << "Error while shifting out WRITE command for device " << _deviceIndex << endl;
 		return;
 	}
 	dwNumBytesToSend = 0; // Reset output buffer pointer
@@ -2006,7 +2006,7 @@ void FTDIDevice::iowrite32raw(DWORD startAddr, DWORD *data, WORD size)
 		// Shift out 1-bit SEQ Transfer Instruction: 0x1 for sequential WRITE while simultaneously leaving Shift-DR via TMS Exit-DR
 		byOutputBuffer[dwNumBytesToSend++] = 0x4B;		 // Clock bits out with read
 		byOutputBuffer[dwNumBytesToSend++] = 0x00;		 // Length + 1 (1 bits here)
-		byOutputBuffer[dwNumBytesToSend++] = 0b10000001; // Ones only
+		byOutputBuffer[dwNumBytesToSend++] = 0b10000001; // Only 1 to leave Shift-DR with SEQ Bit
 
 		// Loop around once through Update-DR and then go back to Shift-DR
 		byOutputBuffer[dwNumBytesToSend++] = 0x4B;										   // Clock bits out without read

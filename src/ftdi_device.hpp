@@ -66,9 +66,9 @@ public:
 
 	// Sequential RW w/ optional progress output
 	void ioread32raw(DWORD startAddr, DWORD *data, WORD size);
-	void iowrite32raw(DWORD startAddr, DWORD *data, WORD size);
+	void iowrite32raw(DWORD startAddr, DWORD *data, WORD size); // ALWAYS PRINTS ONE DWORD MORE WITH CONTENT 0x80000000 ?!?!
 	void ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress = false);
-	void iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progress = false); // DOES WORK FOR size = 255, but not for 256!!!
+	void iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progress = false); // DOES WORK CORRECTLY FOR size = 255, but not for 256 ?!?!
 };
 
 #endif /* FTDI_DEVICE_HPP */
