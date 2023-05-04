@@ -128,7 +128,7 @@ void mem(FTDIDevice &handle, DWORD startAddr, DWORD length)
 	DWORD chars[showWidth];
 	WORD arrayIndex = 0;
 
-	handle.ioread32(startAddr, arr, length, length >= 128); // Use sequential reads
+	handle.ioread32(startAddr, arr, length, length > 256); // Use sequential reads
 
 	for (DWORD i = 0; i < length; i++)
 	{
@@ -251,11 +251,17 @@ void memb(FTDIDevice &handle, DWORD startAddr, DWORD length)
 	}
 }
 
-void wash(FTDIDevice &handle, DWORD size)
+void wash(FTDIDevice &handle, WORD size, DWORD addr, DWORD c)
 {
 	DWORD data[size] = {};
 
-	const DWORD addr = 0x40000000; // Begin writing from this address
+	for (WORD i = 0; i < size; i++)
+	{
+		data[i] = c;
+	}
+
+	cout << "Writing 0x" << hex << (unsigned int)c << " to " << dec << (unsigned int)size << " DWORD(s) in memory, starting at 0x" << hex << addr << "..." << endl;
+
 	handle.iowrite32(addr, data, size, true);
 
 	cout << "Wash of " << (unsigned int)size << " DWORD(s) complete!" << endl;
@@ -275,6 +281,7 @@ void load(FTDIDevice &handle, string &path)
 	if (!file.read(buffer, size))
 	{
 		cerr << "Error loading file '" << path << "'..." << endl;
+		return;
 	}
 
 	const streamsize bytesRead = file.gcount(); // Number of bytes actually read
@@ -298,4 +305,58 @@ void load(FTDIDevice &handle, string &path)
 	handle.iowrite32(addr, writeBuffer, writeSize, true);
 
 	cout << "Loading file complete!" << endl;
+}
+
+void verify(FTDIDevice &handle, std::string &path)
+{
+	ifstream file;
+	file.open(path, ios::binary | ios::ate);
+
+	const streamsize size = file.tellg();
+
+	char buffer[size] = {}; // Create buffer for individual BYTES of binary data
+
+	file.seekg(0, ios::beg);
+
+	if (!file.read(buffer, size))
+	{
+		cerr << "Error loading file '" << path << "'..." << endl;
+		return;
+	}
+
+	const streamsize bytesRead = file.gcount(); // Number of bytes actually read
+	file.close();
+
+	cout << "Verifying File '" << path << "'..." << endl;
+	cout << "File Size: " << dec << size << " B" << endl;
+	cout << "Size Read: " << dec << bytesRead << " B" << endl;
+	// TODO: Check for compatability or something?
+	cout << endl;
+
+	const WORD writeSize = ceil(float(bytesRead) * sizeof(BYTE) / sizeof(DWORD));
+	DWORD writeBuffer[writeSize];
+
+	for (WORD i = 0; i < writeSize; i++)
+	{
+		writeBuffer[i] = (buffer[i * 4] << 24) | (buffer[i * 4 + 1] << 16) | (buffer[i * 4 + 2] << 8) | buffer[i * 4 + 3];
+	}
+
+	DWORD readBuffer[writeSize];
+
+	const DWORD addr = 0x40000000; // Begin writing from this address
+	handle.ioread32(addr, readBuffer, writeSize, true);
+
+	cout << "Verifying file... " << flush;
+
+	for (WORD i = 0; i < writeSize; i++)
+	{
+		if (readBuffer[i] != writeBuffer[i])
+		{
+			cerr << "\rVerifying file... ERROR! Byte " << dec << i << " incorrect." << endl;
+			return;
+		}
+		cout << "\rVerifying file... " << dec << (unsigned int)((float)i / (float)(writeSize - 1) * 100.0) << "%    " << flush;
+	}
+
+	cout << "\rVerifying file... OK!    " << endl;
 }
