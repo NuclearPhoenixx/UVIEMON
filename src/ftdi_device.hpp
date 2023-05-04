@@ -33,9 +33,6 @@ private:
 	FT_STATUS _initMPSSEMode();
 	FT_STATUS _resetJTAGStateMachine();
 
-	void _ioread32(DWORD startAddr, DWORD *data, WORD size);
-	void _iowrite32(DWORD startAddr, DWORD *data, WORD size);
-
 	void _initDSU();
 
 public:
@@ -68,8 +65,10 @@ public:
 	void iowrite32(DWORD addr, DWORD data);
 
 	// Sequential RW w/ optional progress output
-	void ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress = false);	// CHECK FOR CORRECT DATA INPUT!
-	void iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progress = false); // CHECK FOR CORRECT DATA OUTPUT!
+	void ioread32raw(DWORD startAddr, DWORD *data, WORD size);
+	void iowrite32raw(DWORD startAddr, DWORD *data, WORD size);
+	void ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress = false);
+	void iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progress = false); // DOES WORK FOR size = 255, but not for 256!!!
 };
 
 #endif /* FTDI_DEVICE_HPP */

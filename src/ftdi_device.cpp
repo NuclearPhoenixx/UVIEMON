@@ -179,8 +179,8 @@ FT_STATUS FTDIDevice::_initMPSSEMode()
 		return ftStatus;
 	}
 
-	// Set the latency timer to 5 ms, just a random value to test really
-	ftStatus = FT_SetLatencyTimer(_ftHandle, 5);
+	// Set the latency timer to 2 ms, just a random value to test really
+	ftStatus = FT_SetLatencyTimer(_ftHandle, 2);
 	if (ftStatus != FT_OK)
 	{
 		cerr << "Failed to set latency timer on device " << _deviceIndex << endl;
@@ -188,8 +188,8 @@ FT_STATUS FTDIDevice::_initMPSSEMode()
 		return ftStatus;
 	}
 
-	// Set the read and write timeouts to 5s
-	ftStatus = FT_SetTimeouts(_ftHandle, 5000, 5000);
+	// Set the read and write timeouts to 1s
+	ftStatus = FT_SetTimeouts(_ftHandle, 1000, 1000);
 	if (ftStatus != FT_OK)
 	{
 		cerr << "Failed to set timeouts on device " << _deviceIndex << endl;
@@ -1042,7 +1042,7 @@ DWORD FTDIDevice::ioread32(DWORD addr)
 	return (DWORD)((unsigned char)(byInputBuffer[3]) << 24 | (unsigned char)(byInputBuffer[2]) << 16 | (unsigned char)(byInputBuffer[1]) << 8 | (unsigned char)(byInputBuffer[0]));
 }
 
-void FTDIDevice::_ioread32(DWORD startAddr, DWORD *data, WORD size)
+void FTDIDevice::ioread32raw(DWORD startAddr, DWORD *data, WORD size)
 {
 	if (size > 256) // Check 1kB boundary for SEQ transfers
 	{
@@ -1235,7 +1235,7 @@ void FTDIDevice::ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress
 	{
 		if (progress) // Optional terminal progress output
 		{
-			cout << "\rReading data from memory... " << dec << (unsigned int)(i / (readChunks - 1.0) * 100.0) << "%  " << flush;
+			cout << "\rReading data from memory... " << dec << (unsigned int)((float)i / (float)(readChunks - 1.0) * 100.0) << "%  " << flush;
 		}
 
 		DWORD addr = startAddr + 1024 * i;
@@ -1252,7 +1252,7 @@ void FTDIDevice::ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress
 
 		DWORD tempData[readSize];
 
-		_ioread32(addr, tempData, readSize);
+		ioread32raw(addr, tempData, readSize);
 
 		for (WORD j = 0; j < readSize; j++)
 		{
@@ -1835,7 +1835,7 @@ void FTDIDevice::iowrite32(DWORD addr, DWORD data)
 	}
 }
 
-void FTDIDevice::_iowrite32(DWORD startAddr, DWORD *data, WORD size)
+void FTDIDevice::iowrite32raw(DWORD startAddr, DWORD *data, WORD size)
 {
 	if (size > 256) // Check 1kB boundary for SEQ transfers
 	{
@@ -2041,13 +2041,13 @@ void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progres
 	{
 		if (progress) // Optional terminal progress output
 		{
-			cout << "\rWriting data to memory... " << dec << (unsigned int)(i / (writeChunks - 1.0) * 100.0) << "%  " << flush;
+			cout << "\rWriting data to memory... " << dec << (unsigned int)((float)i / (float)(writeChunks - 1.0) * 100.0) << "%  " << flush;
 		}
 
 		DWORD addr = startAddr + 1024 * i;
 		WORD writeSize; // Number of DWORDS to write
 
-		if (i == writeChunks - 1) // Last write
+		if (i == writeChunks - 1 && size % 256 != 0) // Last write is not a full 1024B chunk
 		{
 			writeSize = size % 256; // Remainder
 		}
@@ -2063,7 +2063,7 @@ void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progres
 			tempData[j] = data[i * 256 + j];
 		}
 
-		_iowrite32(addr, tempData, writeSize);
+		iowrite32raw(addr, tempData, writeSize);
 	}
 
 	if (progress) // Optional terminal progress output
