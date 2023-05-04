@@ -16,6 +16,7 @@
 
 #include <iostream>
 #include <unistd.h> // Unix lib for sleep
+#include <cmath>	// For std::ceil in ioread/write32()
 
 #include "leon3_dsu.h" // Interface to the GR712 debug support unit
 
@@ -1041,16 +1042,11 @@ DWORD FTDIDevice::ioread32(DWORD addr)
 	return (DWORD)((unsigned char)(byInputBuffer[3]) << 24 | (unsigned char)(byInputBuffer[2]) << 16 | (unsigned char)(byInputBuffer[1]) << 8 | (unsigned char)(byInputBuffer[0]));
 }
 
-void FTDIDevice::ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress)
+void FTDIDevice::_ioread32(DWORD startAddr, DWORD *data, WORD size)
 {
-	if (size > 250) // Check 1kB boundary for SEQ transfers
+	if (size > 256) // Check 1kB boundary for SEQ transfers
 	{
 		cerr << "Warning: Size is bigger than recommended 1 kB maximum (GR712RC-UM)!" << endl;
-	}
-
-	if (progress) // Optional terminal progress output
-	{
-		cout << "Writing data to memory... " << flush;
 	}
 
 	BYTE byOutputBuffer[100];	// Buffer to hold MPSSE commands and data to be sent to the FT2232H
@@ -1170,11 +1166,6 @@ void FTDIDevice::ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress
 
 	for (WORD i = 0; i < size; i++)
 	{
-		if (progress) // Optional terminal progress output
-		{
-			cout << "\rReading data from memory... " << dec << (unsigned int)((i + 1) / (float)size * 100.0) << "%  " << flush;
-		}
-
 		// Clock out read command
 		byOutputBuffer[dwNumBytesToSend++] = 0x28; // Read Bytes
 		byOutputBuffer[dwNumBytesToSend++] = 0x03; // 3 + 1 Bytes = 32 bit AHB Data -> Does not read SEQ Bit!
@@ -1228,6 +1219,45 @@ void FTDIDevice::ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress
 	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
 	{
 		return;
+	}
+}
+
+void FTDIDevice::ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress)
+{
+	if (progress) // Optional terminal progress output
+	{
+		cout << "Reading data from memory... " << flush;
+	}
+
+	WORD readChunks = ceil((float)size / 256.0); // How many individual read chunks are needed
+
+	for (WORD i = 0; i < readChunks; i++)
+	{
+		if (progress) // Optional terminal progress output
+		{
+			cout << "\rReading data from memory... " << dec << (unsigned int)(i / (readChunks - 1.0) * 100.0) << "%  " << flush;
+		}
+
+		DWORD addr = startAddr + 1024 * i;
+		WORD readSize; // Number of DWORDS to read
+
+		if (i == readChunks - 1 && size % 256 != 0) // Last read is not a full 1024B chunk
+		{
+			readSize = size % 256; // Remainder
+		}
+		else
+		{
+			readSize = 256;
+		}
+
+		DWORD tempData[readSize];
+
+		_ioread32(addr, tempData, readSize);
+
+		for (WORD j = 0; j < readSize; j++)
+		{
+			data[i * 256 + j] = tempData[j];
+		}
 	}
 
 	if (progress) // Optional terminal progress output
@@ -1805,16 +1835,11 @@ void FTDIDevice::iowrite32(DWORD addr, DWORD data)
 	}
 }
 
-void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progress)
+void FTDIDevice::_iowrite32(DWORD startAddr, DWORD *data, WORD size)
 {
-	if (size > 250) // Check 1kB boundary for SEQ transfers
+	if (size > 256) // Check 1kB boundary for SEQ transfers
 	{
 		cerr << "Warning: Size is bigger than recommended 1 kB maximum (GR712RC-UM)!" << endl;
-	}
-
-	if (progress) // Optional terminal progress output
-	{
-		cout << "Writing data to memory... " << flush;
 	}
 
 	BYTE byOutputBuffer[100]; // Buffer to hold MPSSE commands and data to be sent to the FT2232H
@@ -1937,11 +1962,6 @@ void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progres
 	// Iterate over data package and write individual DWORDs to memory
 	for (WORD i = 0; i < size; i++)
 	{
-		if (progress) // Optional terminal progress output
-		{
-			cout << "\rWriting data to memory... " << dec << (unsigned int)((i + 1) / (float)size * 100.0) << "%  " << flush;
-		}
-
 		/*
 		// Clock out 10 x 8 bits of 0s only to clear out any other values
 		byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
@@ -2006,9 +2026,48 @@ void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progres
 	{
 		return;
 	}
+}
+
+void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progress)
+{
+	if (progress) // Optional terminal progress output
+	{
+		cout << "Writing data to memory... " << flush;
+	}
+
+	WORD writeChunks = ceil((float)size / 256.0); // How many individual write chunks are needed
+
+	for (WORD i = 0; i < writeChunks; i++)
+	{
+		if (progress) // Optional terminal progress output
+		{
+			cout << "\rWriting data to memory... " << dec << (unsigned int)(i / (writeChunks - 1.0) * 100.0) << "%  " << flush;
+		}
+
+		DWORD addr = startAddr + 1024 * i;
+		WORD writeSize; // Number of DWORDS to write
+
+		if (i == writeChunks - 1) // Last write
+		{
+			writeSize = size % 256; // Remainder
+		}
+		else
+		{
+			writeSize = 256;
+		}
+
+		DWORD tempData[writeSize];
+
+		for (WORD j = 0; j < writeSize; j++)
+		{
+			tempData[j] = data[i * 256 + j];
+		}
+
+		_iowrite32(addr, tempData, writeSize);
+	}
 
 	if (progress) // Optional terminal progress output
 	{
-		cout << "\rWriting data to memory... OK!       " << endl;
+		cout << "\rWriting data to memory... Complete!   " << endl;
 	}
 }

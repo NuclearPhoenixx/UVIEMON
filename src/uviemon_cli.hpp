@@ -28,7 +28,7 @@ void memh(FTDIDevice &handle, DWORD startAddr, DWORD length = 32); // Works fine
 void memb(FTDIDevice &handle, DWORD startAddr, DWORD length = 64); // Works fine
 
 void wash(FTDIDevice &handle, DWORD size = 16);	  // TODO: More features like grmon!
-void load(FTDIDevice &handle, std::string &path); // TODO: Test if it works!?
+void load(FTDIDevice &handle, std::string &path); // Doesn't work correctly
 // void verify(FTDIDevice &handle, std::string &path); // TODO: Verify uploaded binary data
 // void run(FTDIDevice &handle); // TODO: Run Uploaded Executable
 
