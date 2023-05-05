@@ -273,6 +273,13 @@ void load(FTDIDevice &handle, string &path)
 	file.open(path, ios::binary | ios::ate);
 
 	const streamsize size = file.tellg();
+	const uint32_t cutoffSize = 64 * 1024; // Cut off the first 64 kiB of data (ELF-header + alignment section)
+
+	if (size < cutoffSize)
+	{
+		cerr << "File size is too small! Needs to be at least 64 kiB..." << endl;
+		return;
+	}
 
 	char buffer[size] = {}; // Create buffer for individual BYTES of binary data
 
@@ -296,7 +303,7 @@ void load(FTDIDevice &handle, string &path)
 	const unsigned int writeSize = ceil(float(bytesRead) * sizeof(BYTE) / sizeof(DWORD));
 	DWORD writeBuffer[writeSize];
 
-	for (DWORD i = 0; i < writeSize; i++)
+	for (DWORD i = cutoffSize / 4 /* Divide by 4 to convert BYTES to DWORDS */; i < writeSize; i++) // Start after cutoff
 	{
 		writeBuffer[i] = (buffer[i * 4] << 24) | (buffer[i * 4 + 1] << 16) | (buffer[i * 4 + 2] << 8) | buffer[i * 4 + 3];
 	}
