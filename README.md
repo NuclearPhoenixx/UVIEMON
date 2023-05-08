@@ -8,6 +8,6 @@ Used for debugging the GR712RC Dual-Core LEON3FT SPARC V8 Processor on the the S
 g++ -o uviemon *.cpp *.c -L./lib/ftdi/build/ -lftd2xx -lreadline -Wall -O -pthread -std=c++11
 ```
 
-**TODO:** Use git submodules for include libs (https://github.com/aluntzer/flightos)
+**TODO:** Use git submodules for include libs ([aluntzer/flightos](https://github.com/aluntzer/flightos))
 
 **TODO:** All the rest
