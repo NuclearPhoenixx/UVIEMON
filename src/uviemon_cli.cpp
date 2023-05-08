@@ -300,15 +300,16 @@ void load(FTDIDevice &handle, string &path)
 	// TODO: Check for compatability or something?
 	cout << endl;
 
-	const unsigned int writeSize = ceil(float(bytesRead) * sizeof(BYTE) / sizeof(DWORD));
+	const unsigned int offset = cutoffSize * sizeof(BYTE) / sizeof(DWORD);						   // Divide to convert BYTES to DWORDS
+	const unsigned int writeSize = ceil(float(bytesRead) * sizeof(BYTE) / sizeof(DWORD) - offset); // Divide to convert BYTES to DWORDS and subtract the offset
 	DWORD writeBuffer[writeSize];
 
-	for (DWORD i = cutoffSize / 4 /* Divide by 4 to convert BYTES to DWORDS */; i < writeSize; i++) // Start after cutoff
+	for (DWORD i = offset; i < writeSize; i++) // Start after cutoff
 	{
-		writeBuffer[i] = (buffer[i * 4] << 24) | (buffer[i * 4 + 1] << 16) | (buffer[i * 4 + 2] << 8) | buffer[i * 4 + 3];
+		writeBuffer[i - offset] = (buffer[i * 4] << 24) | (buffer[i * 4 + 1] << 16) | (buffer[i * 4 + 2] << 8) | buffer[i * 4 + 3];
 	}
 
-	const DWORD addr = 0x40000000; // Begin writing from this address
+	const DWORD addr = 0x40000000; // Begin writing to this address
 	handle.iowrite32(addr, writeBuffer, writeSize, true);
 
 	cout << "Loading file complete!" << endl;
@@ -320,6 +321,13 @@ void verify(FTDIDevice &handle, std::string &path)
 	file.open(path, ios::binary | ios::ate);
 
 	const streamsize size = file.tellg();
+	const uint32_t cutoffSize = 64 * 1024; // Cut off the first 64 kiB of data (ELF-header + alignment section)
+
+	if (size < cutoffSize)
+	{
+		cerr << "File size is too small! Needs to be at least 64 kiB..." << endl;
+		return;
+	}
 
 	char buffer[size] = {}; // Create buffer for individual BYTES of binary data
 
@@ -340,13 +348,8 @@ void verify(FTDIDevice &handle, std::string &path)
 	// TODO: Check for compatability or something?
 	cout << endl;
 
-	const WORD writeSize = ceil(float(bytesRead) * sizeof(BYTE) / sizeof(DWORD));
-	DWORD writeBuffer[writeSize];
-
-	for (WORD i = 0; i < writeSize; i++)
-	{
-		writeBuffer[i] = (buffer[i * 4] << 24) | (buffer[i * 4 + 1] << 16) | (buffer[i * 4 + 2] << 8) | buffer[i * 4 + 3];
-	}
+	const unsigned int offset = cutoffSize * sizeof(BYTE) / sizeof(DWORD);						   // Divide to convert BYTES to DWORDS
+	const unsigned int writeSize = ceil(float(bytesRead) * sizeof(BYTE) / sizeof(DWORD) - offset); // Divide to convert BYTES to DWORDS and subtract the offset
 
 	DWORD readBuffer[writeSize];
 
@@ -355,9 +358,11 @@ void verify(FTDIDevice &handle, std::string &path)
 
 	cout << "Verifying file... " << flush;
 
-	for (WORD i = 0; i < writeSize; i++)
+	for (DWORD i = offset; i < writeSize; i++) // Start after cutoff
 	{
-		if (readBuffer[i] != writeBuffer[i])
+		const DWORD dataPoint = (buffer[i * 4] << 24) | (buffer[i * 4 + 1] << 16) | (buffer[i * 4 + 2] << 8) | buffer[i * 4 + 3];
+
+		if (readBuffer[i - offset] != dataPoint)
 		{
 			cerr << "\rVerifying file... ERROR! Byte " << dec << i << " incorrect." << endl;
 			return;
