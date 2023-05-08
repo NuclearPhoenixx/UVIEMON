@@ -179,8 +179,8 @@ FT_STATUS FTDIDevice::_initMPSSEMode()
 		return ftStatus;
 	}
 
-	// Set the latency timer to 2 ms, just a random value to test really
-	ftStatus = FT_SetLatencyTimer(_ftHandle, 2);
+	// Set the latency timer to 1 ms, just a random value to test really
+	ftStatus = FT_SetLatencyTimer(_ftHandle, 1);
 	if (ftStatus != FT_OK)
 	{
 		cerr << "Failed to set latency timer on device " << _deviceIndex << endl;
@@ -188,8 +188,8 @@ FT_STATUS FTDIDevice::_initMPSSEMode()
 		return ftStatus;
 	}
 
-	// Set the read and write timeouts to 1s
-	ftStatus = FT_SetTimeouts(_ftHandle, 1000, 1000);
+	// Set the read and write timeouts to 10ms
+	ftStatus = FT_SetTimeouts(_ftHandle, 10, 10);
 	if (ftStatus != FT_OK)
 	{
 		cerr << "Failed to set timeouts on device " << _deviceIndex << endl;
@@ -224,7 +224,7 @@ FT_STATUS FTDIDevice::_initMPSSEMode()
 		===============
 		--> Synchronization & Bad Command Detection
 	*/
-	DWORD dwClockDivisor = 0x0004; // Value of clock divisor, SCL Frequency = 60/((1+0x0004)*2) (MHz) = 6Mhz
+	DWORD dwClockDivisor = 0x0002; // Value of clock divisor, SCL Frequency = 60/((1+0x0002)*2) (MHz) = 10 Mhz
 	BYTE byOutputBuffer[8];		   // Buffer to hold MPSSE commands and data to be sent to the FT2232H
 	BYTE byInputBuffer[8];		   // Buffer to hold data read from the FT2232H
 	DWORD dwCount = 0;			   // General loop index
