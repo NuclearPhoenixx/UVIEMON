@@ -715,7 +715,7 @@ void FTDIDevice::scanInstructionCodes(BYTE bitLengthIR)
 		unsigned int length = scanDRLength(i); // Grab individual DR Data register length
 		if (length != 0)
 		{
-			cout << "- DR length for address 0x" << hex << uppercase << (unsigned int)i << ": " << dec << length << " bits" << endl;
+			cout << "- DR length for address 0x" << hex << uppercase << (unsigned int)i << ": " << dec << length << " bit" << endl;
 			numberOfInstructions++;
 		}
 	}
@@ -825,11 +825,6 @@ BYTE FTDIDevice::scanDRLength(BYTE opcode)
 	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
 	{
 		return 0;
-	}
-
-	if (lengthDR == 1) // Somehow returns "too much", so tone it down a bit...
-	{
-		lengthDR = 0;
 	}
 
 	return lengthDR; // Exit with success
