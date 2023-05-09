@@ -224,7 +224,7 @@ FT_STATUS FTDIDevice::_initMPSSEMode()
 		===============
 		--> Synchronization & Bad Command Detection
 	*/
-	DWORD dwClockDivisor = 0x0002; // Value of clock divisor, SCL Frequency = 60/((1+0x0002)*2) (MHz) = 10 Mhz
+	DWORD dwClockDivisor = 0x0004; // Value of clock divisor, SCL Frequency = 60/((1+0x0004)*2) (MHz) = 6 Mhz --> Faster values might introduce issues!
 	BYTE byOutputBuffer[8];		   // Buffer to hold MPSSE commands and data to be sent to the FT2232H
 	BYTE byInputBuffer[8];		   // Buffer to hold data read from the FT2232H
 	DWORD dwCount = 0;			   // General loop index
