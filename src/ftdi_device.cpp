@@ -827,6 +827,11 @@ BYTE FTDIDevice::scanDRLength(BYTE opcode)
 		return 0;
 	}
 
+	if (lengthDR == 1) // Somehow returns "too much", so tone it down a bit...
+	{
+		lengthDR = 0;
+	}
+
 	return lengthDR; // Exit with success
 }
 
