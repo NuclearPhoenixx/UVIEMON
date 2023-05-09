@@ -10,7 +10,7 @@
 	Compat:
 		bee on/off
 		grmon -jtaglist -ftdi						--> uviemon -list
-		grmon -ftdi -u -ftdifreq 2 -jtagcable 3		--> uviemon -jtag 3
+		grmon -ftdi -u -ftdifreq 2 -jtagcable 3		--> uviemon -jtag 2
 		grmon --help								--> uviemon -help
 */
 
