@@ -1175,7 +1175,7 @@ void FTDIDevice::ioread32raw(DWORD startAddr, DWORD *data, WORD size)
 		if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
 		{
 			cerr << "Error while shifting out read instruction for device " << _deviceIndex << endl;
-			return;
+			break;
 		}
 		dwNumBytesToSend = 0; // Reset output buffer pointer
 
@@ -1188,14 +1188,14 @@ void FTDIDevice::ioread32raw(DWORD startAddr, DWORD *data, WORD size)
 		if (ftStatus != FT_OK)
 		{
 			cerr << "Error while reading data register for device " << _deviceIndex << endl;
-			return;
+			break;
 		}
 
 		if (dwNumBytesRead != dwNumBytesToRead)
 		{
 			cerr << "Bytes read: " << dec << dwNumBytesRead << endl;
 			cerr << "Device did not return the correct number of bytes for the data register." << endl;
-			return;
+			break;
 		}
 
 		// Format data
@@ -1211,15 +1211,12 @@ void FTDIDevice::ioread32raw(DWORD startAddr, DWORD *data, WORD size)
 		if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
 		{
 			cerr << "Communication error with JTAG device!" << endl;
-			return;
+			break;
 		}
 		dwNumBytesToSend = 0; // Reset output buffer pointer
 	}
 
-	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
-	{
-		return;
-	}
+	_resetJTAGStateMachine(); // Reset back to TLR
 }
 
 void FTDIDevice::ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress)
@@ -2020,15 +2017,12 @@ void FTDIDevice::iowrite32raw(DWORD startAddr, DWORD *data, WORD size)
 		if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
 		{
 			cerr << "Communication error with JTAG device!" << endl;
-			return;
+			break;
 		}
 		dwNumBytesToSend = 0; // Reset output buffer pointer
 	}
 
-	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
-	{
-		return;
-	}
+	_resetJTAGStateMachine(); // Reset back to TLR
 }
 
 void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progress)
