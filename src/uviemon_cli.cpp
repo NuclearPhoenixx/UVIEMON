@@ -372,3 +372,12 @@ void verify(FTDIDevice &handle, std::string &path)
 
 	cout << "\rVerifying file... OK!    " << endl;
 }
+
+void run(FTDIDevice &handle)
+{
+	cout << "Running executable..." << endl;
+
+	// TODO: Check if something has been uploaded
+
+	// TODO: Actually run the things
+}

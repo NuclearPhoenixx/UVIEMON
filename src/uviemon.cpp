@@ -22,8 +22,6 @@ using namespace std; // Makes my life easier
 
 FTDIDevice device; // Device handle for the FTDI chip
 
-bool run = true; // As long as this is true, the console() will keep on running
-
 /*
 void signalHandler(int signal)
 {
@@ -340,6 +338,10 @@ void console()
 			{
 				wash(device);
 			}
+		}
+		else if (words[0] == "run")
+		{
+			run(device);
 		}
 		else if (words[0] == "exit")
 		{

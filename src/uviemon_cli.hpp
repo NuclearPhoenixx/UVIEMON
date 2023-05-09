@@ -28,8 +28,8 @@ void memh(FTDIDevice &handle, DWORD startAddr, DWORD length = 32);
 void memb(FTDIDevice &handle, DWORD startAddr, DWORD length = 64);
 
 void wash(FTDIDevice &handle, WORD size = 16, DWORD addr = 0x40000000, DWORD c = 0);
-void load(FTDIDevice &handle, std::string &path); // CHECK IF BINARIES ARE UPLOADED CORRECTLY!
-void verify(FTDIDevice &handle, std::string &path);
-// void run(FTDIDevice &handle); // TODO: Run Uploaded Executable
+void load(FTDIDevice &handle, std::string &path);
+void verify(FTDIDevice &handle, std::string &path); // Really slow because sequential reads are dead slow
+void run(FTDIDevice &handle);						// TODO: Run Uploaded Executable
 
 #endif /* UVIEMON_CLI_HPP */
