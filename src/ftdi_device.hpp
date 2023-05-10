@@ -33,7 +33,7 @@ private:
 	FT_STATUS _initMPSSEMode();
 	FT_STATUS _resetJTAGStateMachine();
 
-	void _initDSU();
+	void _initCore2Idle();
 
 public:
 	FTDIDevice();  // Constructor
@@ -52,6 +52,11 @@ public:
 	BYTE scanIRLength();
 	BYTE scanDRLength(BYTE opcode);
 	void scanInstructionCodes(BYTE maxIRLength); // Has CLI Output!
+
+	/*
+		DSU operations for runnning programs
+	*/
+	void runCPU(BYTE cpuID = 0); // 0 or 1 for either core
 
 	/*
 		Memory RW operations

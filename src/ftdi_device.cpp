@@ -135,7 +135,7 @@ FT_STATUS FTDIDevice::open(DWORD deviceIndex)
 		return ftStatus;
 	}
 
-	_initDSU(); // Initialize the debug support unit
+	_initCore2Idle(); // Initialize the debug support unit
 
 	return ftStatus;
 }
@@ -403,11 +403,11 @@ FT_STATUS FTDIDevice::_resetJTAGStateMachine()
 	return ftStatus;
 }
 
-void FTDIDevice::_initDSU()
+void FTDIDevice::_initCore2Idle()
 {
 	// Initialize the debug support unit for one CPU core
 	// Taken from setup.c: sxi_dpu_setup_cpu_entry()
-	cout << "Configuring DSU... " << flush;
+	cout << "Configuring CPU core 2 idle... " << flush;
 
 	/* XXX this is needed for SXI DPU; the boot sw cannot start
 	 * in SMP mode, so the second CPU is still at 0x0 initially
@@ -441,6 +441,39 @@ void FTDIDevice::_initDSU()
 	dsu_clear_cpu_break_on_iu_watchpoint(1);
 	// Resume cpu 1
 	dsu_clear_force_debug_on_watchpoint(1);
+
+	cout << "done!" << endl;
+}
+
+void FTDIDevice::runCPU(BYTE cpuID)
+{
+	// Stop the CPU core, set it to the beginning of the memory and wake it up again to execute the binary in memory
+	const uint32_t addr = 0x40000000;
+
+	dsu_set_noforce_debug_mode(cpuID);
+	dsu_set_cpu_break_on_iu_watchpoint(cpuID);
+	dsu_set_cpu_halt_mode(cpuID);
+
+	dsu_set_force_debug_on_watchpoint(cpuID);
+
+	dsu_set_reg_tbr(cpuID, addr);
+
+	dsu_set_reg_pc(cpuID, addr);
+	dsu_set_reg_npc(cpuID, addr + 0x4);
+
+	dsu_clear_iu_reg_file(cpuID);
+
+	dsu_set_reg_wim(cpuID, 0x2);		// Default invalid mask
+	dsu_set_reg_psr(cpuID, 0xf34010e1); // Set CWP to 7
+
+	const uint32_t start = 0x40000000 + 8 * 1024 * 1024; // Set to start of RAM + 8 MiB
+
+	dsu_set_reg_sp(cpuID, 0, start); // NOT SURE ABOUT THE cwp!
+	dsu_set_reg_fp(cpuID, 0, start); // NOT SURE ABOUT THE cwp!
+
+	dsu_clear_cpu_break_on_iu_watchpoint(cpuID);
+	dsu_clear_force_debug_on_watchpoint(cpuID); // Resume cpu
+	dsu_set_cpu_wake_up(cpuID);					// CPU wake from setup.c
 
 	cout << "done!" << endl;
 }
