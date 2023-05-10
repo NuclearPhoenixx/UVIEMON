@@ -230,6 +230,7 @@ struct dsu_ahb_trace_buffer {
 
 void dsu_set_cpu_wake_up(uint32_t cpu);
 void dsu_set_noforce_debug_mode(uint32_t cpu);
+void dsu_set_cpu_halt_mode(uint32_t cpu);
 void dsu_set_cpu_debug_on_error(uint32_t cpu);
 void dsu_set_cpu_break_on_iu_watchpoint(uint32_t cpu);
 void dsu_set_cpu_break_on_breakpoint(uint32_t cpu);

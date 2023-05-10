@@ -405,7 +405,7 @@ uint32_t dsu_cpu_in_halt_mode(uint32_t cpu)
  * @see GR712-UM v2.3 pp. 82
  */
 
-void dsu_cpu_set_halt_mode(uint32_t cpu)
+void dsu_set_cpu_halt_mode(uint32_t cpu)
 {
 	dsu_set_dsu_ctrl(cpu, DSU_CTRL_HL);
 }
