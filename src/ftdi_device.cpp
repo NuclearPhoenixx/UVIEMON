@@ -454,6 +454,8 @@ void FTDIDevice::runCPU(BYTE cpuID)
 	dsu_set_cpu_break_on_iu_watchpoint(cpuID);
 	dsu_set_cpu_halt_mode(cpuID);
 
+	cout << dec << "Halt Mode: " << dsu_get_cpu_in_halt_mode(cpuID) << " Error Mode: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
+
 	dsu_set_force_debug_on_watchpoint(cpuID);
 
 	dsu_set_reg_tbr(cpuID, addr);
@@ -474,6 +476,15 @@ void FTDIDevice::runCPU(BYTE cpuID)
 	dsu_clear_cpu_break_on_iu_watchpoint(cpuID);
 	dsu_clear_force_debug_on_watchpoint(cpuID); // Resume cpu
 	dsu_set_cpu_wake_up(cpuID);					// CPU wake from setup.c
+
+	cout << dec << "Halt Mode: " << dsu_get_cpu_in_halt_mode(cpuID) << " Error Mode: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
+
+	sleep(5); // Simple dummy execution time
+
+	cout << dec << "Halt Mode: " << dsu_get_cpu_in_halt_mode(cpuID) << " Error Mode: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
+
+	cout << "CPU 1 Status: " << dec << dsu_get_cpu_state(0) << endl;
+	cout << "CPU 2 Status: " << dec << dsu_get_cpu_state(1) << endl;
 
 	cout << "done!" << endl;
 }
