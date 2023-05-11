@@ -361,7 +361,7 @@ void dsu_clear_force_debug_on_watchpoint(uint32_t cpu)
  * @see GR712-UM v2.3 pp. 82
  */
 
-uint32_t dsu_cpu_in_error_mode(uint32_t cpu)
+uint32_t dsu_get_cpu_in_error_mode(uint32_t cpu)
 {
 	return (dsu_get_dsu_ctrl(cpu) & DSU_CTRL_PE);
 }
@@ -391,7 +391,7 @@ void dsu_clear_cpu_error_mode(uint32_t cpu)
  * @see GR712-UM v2.3 pp. 82
  */
 
-uint32_t dsu_cpu_in_halt_mode(uint32_t cpu)
+uint32_t dsu_get_cpu_in_halt_mode(uint32_t cpu)
 {
 	return (dsu_get_dsu_ctrl(cpu) & DSU_CTRL_HL);
 }
