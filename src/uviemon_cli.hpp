@@ -27,9 +27,11 @@ void mem(FTDIDevice &handle, DWORD startAddr, DWORD length = 16);
 void memh(FTDIDevice &handle, DWORD startAddr, DWORD length = 32);
 void memb(FTDIDevice &handle, DWORD startAddr, DWORD length = 64);
 
+void bdump(FTDIDevice &handle, DWORD startAddr, DWORD length, std::string &path); // Dump length in Byte?
+
 void wash(FTDIDevice &handle, WORD size = 16, DWORD addr = 0x40000000, DWORD c = 0);
 void load(FTDIDevice &handle, std::string &path);
 void verify(FTDIDevice &handle, std::string &path); // Really slow because sequential reads are dead slow
-void run(FTDIDevice &handle);						// TODO: Run Uploaded Executable
+void run(FTDIDevice &handle);
 
 #endif /* UVIEMON_CLI_HPP */

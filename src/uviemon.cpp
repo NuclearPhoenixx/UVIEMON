@@ -82,6 +82,8 @@ void console()
 			cout << "  wmemh: \t Write <data#2> 16-bit WORD to a memory <address#1>" << endl;
 			cout << "  wmemb: \t Write <data#2> 8-bit BYTE to a memory <address#1>" << endl;
 			cout << endl;
+			cout << "  bdump: \t Read <length#2> DWORDs of data from memory starting at an <address#1>, saving the data to a <filePath#1>" << endl;
+			cout << endl;
 			cout << "  load: \t Write a file with <filePath#1> to the device memory" << endl;
 			cout << "  verify: \t Verify a file written to the device memory with <filePath#1>" << endl;
 			cout << "  wash: \t Wash memory with a certain DWORD <length#1> of hex DWORD <characters#3> starting at an <address#2>" << endl;
@@ -288,8 +290,7 @@ void console()
 			}
 			else if (inputWords == 3)
 			{
-				DWORD length;
-				DWORD addr;
+				DWORD length, addr;
 
 				try // Check if user input is an integer
 				{
@@ -311,9 +312,7 @@ void console()
 			}
 			else if (inputWords >= 4)
 			{
-				DWORD length;
-				DWORD addr;
-				DWORD c;
+				DWORD length, addr, c;
 
 				try // Check if user input is an integer
 				{
@@ -337,6 +336,35 @@ void console()
 			else
 			{
 				wash(device);
+			}
+		}
+		else if (words[0] == "bdump")
+		{
+			if (inputWords >= 4)
+			{
+				DWORD length, addr;
+
+				try // Check if user input is an integer
+				{
+					length = stoul(words[2]);
+					addr = stoul(words[1], nullptr, 16);
+				}
+				catch (invalid_argument const &e)
+				{
+					cerr << "Length/address is not a number!" << endl;
+					continue;
+				}
+				catch (out_of_range const &e)
+				{
+					cerr << "Length/address is out of range for a DWORD!" << endl;
+					continue;
+				}
+
+				bdump(device, addr, length, words[3]);
+			}
+			else
+			{
+				cerr << "Missing argument..." << endl;
 			}
 		}
 		else if (words[0] == "run")
