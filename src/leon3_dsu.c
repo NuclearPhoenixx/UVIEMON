@@ -363,7 +363,7 @@ void dsu_clear_force_debug_on_watchpoint(uint32_t cpu)
 
 uint32_t dsu_get_cpu_in_error_mode(uint32_t cpu)
 {
-	return (dsu_get_dsu_ctrl(cpu) & DSU_CTRL_PE);
+	return ((dsu_get_dsu_ctrl(cpu) & DSU_CTRL_PE) >> 9) & 1;
 }
 
 
@@ -393,7 +393,7 @@ void dsu_clear_cpu_error_mode(uint32_t cpu)
 
 uint32_t dsu_get_cpu_in_halt_mode(uint32_t cpu)
 {
-	return (dsu_get_dsu_ctrl(cpu) & DSU_CTRL_HL);
+	return ((dsu_get_dsu_ctrl(cpu) & DSU_CTRL_HL) >> 10) & 1;
 }
 
 
@@ -420,6 +420,20 @@ void dsu_set_cpu_halt_mode(uint32_t cpu)
 void dsu_set_cpu_wake_up(uint32_t cpu)
 {
 	iowrite32be(1 << cpu, (uint32_t)0x80000210);
+}
+
+
+/**
+ * @brief  get status of a cpu core
+ *
+ * @param cpu the cpu number
+ * 
+ * @return 1 = power down, 0 = running
+ */
+
+uint32_t dsu_get_cpu_state(uint32_t cpu)
+{
+	return (ioread32be((uint32_t)0x80000210) >> cpu) & 1;
 }
 
 
