@@ -324,13 +324,11 @@ void load(FTDIDevice &handle, string &path)
 	// TODO: Check for compatability or something?
 	cout << endl;
 
-	/* // Save cut-off header to an extra file
+	// Save cut-off header to an extra file to restore the full binary when downloading again
 	ofstream wfile;
-
-	wfile.open(path + "header.tmp", ios::out | ios::binary);
+	wfile.open(path + "-header.tmp", ios::out | ios::binary);
 	wfile.write(buffer, cutoffSize);
 	wfile.close();
-	*/
 
 	const unsigned int offset = cutoffSize * sizeof(BYTE) / sizeof(DWORD);						   // Divide to convert BYTES to DWORDS
 	const unsigned int writeSize = ceil(float(bytesRead) * sizeof(BYTE) / sizeof(DWORD)) - offset; // Divide to convert BYTES to DWORDS and subtract the offset
