@@ -82,7 +82,7 @@ void console()
 			cout << "  wmemh: \t Write <data#2> 16-bit WORD to a memory <address#1>" << endl;
 			cout << "  wmemb: \t Write <data#2> 8-bit BYTE to a memory <address#1>" << endl;
 			cout << endl;
-			cout << "  bdump: \t Read <length#2> DWORDs of data from memory starting at an <address#1>, saving the data to a <filePath#1>" << endl;
+			cout << "  bdump: \t Read <length#2> BYTEs of data from memory starting at an <address#1>, saving the data to a <filePath#1>" << endl;
 			cout << endl;
 			cout << "  load: \t Write a file with <filePath#1> to the device memory" << endl;
 			cout << "  verify: \t Verify a file written to the device memory with <filePath#1>" << endl;

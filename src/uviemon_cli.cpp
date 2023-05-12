@@ -257,9 +257,11 @@ void bdump(FTDIDevice &handle, DWORD startAddr, DWORD length, string &path)
 	const DWORD charArraySize = length * sizeof(readBuffer[0]);
 	char charArray[charArraySize];
 
-	handle.ioread32(startAddr, readBuffer, length, true);
+	DWORD dwordLength = ceil(length / sizeof(DWORD)); // Convert byte length to DWORD length
 
-	for (DWORD i = 0; i < length; i++)
+	handle.ioread32(startAddr, readBuffer, dwordLength, true);
+
+	for (DWORD i = 0; i < dwordLength; i++)
 	{
 		DWORD temp = readBuffer[i];
 		charArray[i * 4] = (char)(temp >> 24);
@@ -319,8 +321,8 @@ void load(FTDIDevice &handle, string &path)
 	file.close();
 
 	cout << "Uploading File '" << path << "'..." << endl;
-	cout << "File Size: " << dec << size << " B / " << ceil(size * sizeof(BYTE) / sizeof(DWORD)) << " DWORDs" << endl;
-	cout << "Size Read: " << dec << bytesRead << " B / " << ceil(size * sizeof(BYTE) / sizeof(DWORD)) << " DWORDs" << endl;
+	cout << "File Size: " << dec << size << " B" << endl;
+	cout << "Size Read: " << dec << bytesRead << " B" << endl;
 	// TODO: Check for compatability or something?
 	cout << endl;
 
@@ -374,8 +376,8 @@ void verify(FTDIDevice &handle, std::string &path)
 	file.close();
 
 	cout << "Verifying File '" << path << "'..." << endl;
-	cout << "File Size: " << dec << size << " B / " << ceil(size * sizeof(BYTE) / sizeof(DWORD)) << " DWORDs" << endl;
-	cout << "Size Read: " << dec << bytesRead << " B / " << ceil(size * sizeof(BYTE) / sizeof(DWORD)) << " DWORDs" << endl;
+	cout << "File Size: " << dec << size << " B" << endl;
+	cout << "Size Read: " << dec << bytesRead << " B" << endl;
 	// TODO: Check for compatability or something?
 	cout << endl;
 
