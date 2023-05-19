@@ -412,14 +412,17 @@ void dsu_set_cpu_halt_mode(uint32_t cpu)
 
 
 /**
- * @brief  wake up a cpu core; only works with leon3 devices
+ * @brief  wake up a cpu core
  *
  * @param cpu the cpu number
  */
 
 void dsu_set_cpu_wake_up(uint32_t cpu)
 {
-	iowrite32be(1 << cpu, (uint32_t)0x80000210);
+	//dsu_set_dsu_ctrl(cpu, DSU_CTRL_PE);
+
+	iowrite32be(1 << cpu, (uint32_t)0x80000210); // LEON3
+	// iowrite32be(1 << cpu, (uint32_t)0xFF904010); // LEON4
 }
 
 
