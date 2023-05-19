@@ -446,6 +446,30 @@ void FTDIDevice::_initCore2Idle()
 
 void FTDIDevice::runCPU(BYTE cpuID)
 {
+	/*
+	BYTE byOutputBuffer[10];	// Buffer to hold MPSSE commands and data to be sent to the FT2232H
+	DWORD dwNumBytesToSend = 0; // Index to the output buffer
+	DWORD dwNumBytesSent = 0;	// Count of actual bytes sent - used with FT_Write
+
+	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
+	{
+		return;
+	}
+
+	// Goto Run-Test/Idle
+	byOutputBuffer[dwNumBytesToSend++] = 0x4B;													 // Clock out TMS without read
+	byOutputBuffer[dwNumBytesToSend++] = 0x00;													 // Number of clock pulses = Length + 1 (1 bit here)
+	byOutputBuffer[dwNumBytesToSend++] = 0b00000000;											 // Data is shifted LSB first
+	FT_STATUS ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
+
+	if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
+	{
+		cerr << "Error while querying ID for device " << _deviceIndex << endl;
+		return;
+	}
+	dwNumBytesToSend = 0; // Reset output buffer pointer
+	*/
+
 	// Stop the CPU core, set it to the beginning of the memory and wake it up again to execute the binary in memory
 	const uint32_t addr = 0x40000000;
 
@@ -471,8 +495,8 @@ void FTDIDevice::runCPU(BYTE cpuID)
 
 	const uint32_t start = 0x40000000 + 8 * 1024 * 1024; // Set to start of RAM + 8 MiB
 
-	dsu_set_reg_sp(cpuID, 0, start); // NOT SURE ABOUT THE cwp!
-	dsu_set_reg_fp(cpuID, 0, start); // NOT SURE ABOUT THE cwp!
+	dsu_set_reg_sp(cpuID, 1, start);
+	dsu_set_reg_fp(cpuID, 1, start);
 
 	dsu_set_cpu_wake_up(cpuID); // CPU wake from setup.c
 	dsu_clear_cpu_break_on_iu_watchpoint(cpuID);
