@@ -12,6 +12,9 @@
 		grmon -jtaglist -ftdi						--> uviemon -list
 		grmon -ftdi -u -ftdifreq 2 -jtagcable 3		--> uviemon -jtag 2
 		grmon --help								--> uviemon -help
+
+
+	ISSUE: ISO C++ forbids variable length array
 */
 
 #include "ftdi_device.hpp"
