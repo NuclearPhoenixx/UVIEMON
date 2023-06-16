@@ -1,4 +1,0 @@
-
-WARNING
-
-the LD script is likely fucking us with the set up of the stack pointer, need to address this...
