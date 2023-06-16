@@ -1,0 +1,3 @@
+[submodule "src/lib/flightos-smile"]
+	path = src/lib/flightos-smile
+	url = https://github.com/aluntzer/flightos
