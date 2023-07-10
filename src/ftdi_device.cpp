@@ -471,6 +471,10 @@ void FTDIDevice::runCPU(BYTE cpuID)
 	*/
 
 	// Stop the CPU core, set it to the beginning of the memory and wake it up again to execute the binary in memory
+	cout << dec << "Halt Mode: " << dsu_get_cpu_in_halt_mode(cpuID) << " Error Mode: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
+	cout << "CPU 1 Status: " << dec << dsu_get_cpu_state(0) << endl; // 1 = power down, 0 = running
+	cout << "CPU 2 Status: " << dec << dsu_get_cpu_state(1) << endl; // 1 = power down, 0 = running
+
 	const uint32_t addr = 0x40000000;
 
 	dsu_set_noforce_debug_mode(cpuID);
@@ -478,9 +482,8 @@ void FTDIDevice::runCPU(BYTE cpuID)
 	dsu_set_cpu_halt_mode(cpuID);
 
 	cout << dec << "Halt Mode: " << dsu_get_cpu_in_halt_mode(cpuID) << " Error Mode: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
-
-	cout << "CPU 1 Status: " << dec << dsu_get_cpu_state(0) << endl;
-	cout << "CPU 2 Status: " << dec << dsu_get_cpu_state(1) << endl;
+	cout << "CPU 1 Status: " << dec << dsu_get_cpu_state(0) << endl; // 1 = power down, 0 = running
+	cout << "CPU 2 Status: " << dec << dsu_get_cpu_state(1) << endl; // 1 = power down, 0 = running
 
 	dsu_set_force_debug_on_watchpoint(cpuID);
 
@@ -502,14 +505,17 @@ void FTDIDevice::runCPU(BYTE cpuID)
 	dsu_clear_cpu_break_on_iu_watchpoint(cpuID);
 	dsu_clear_force_debug_on_watchpoint(cpuID); // Resume cpu
 
+	this->iowrite32(0x90000000, 0x000002ef); // ACTUALLY RESUMES CPU (kind of)...
+
 	cout << dec << "Halt Mode: " << dsu_get_cpu_in_halt_mode(cpuID) << " Error Mode: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
+	cout << "CPU 1 Status: " << dec << dsu_get_cpu_state(0) << endl; // 1 = power down, 0 = running
+	cout << "CPU 2 Status: " << dec << dsu_get_cpu_state(1) << endl; // 1 = power down, 0 = running
 
 	sleep(5); // Simple dummy execution time
 
 	cout << dec << "Halt Mode: " << dsu_get_cpu_in_halt_mode(cpuID) << " Error Mode: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
-
-	cout << "CPU 1 Status: " << dec << dsu_get_cpu_state(0) << endl;
-	cout << "CPU 2 Status: " << dec << dsu_get_cpu_state(1) << endl;
+	cout << "CPU 1 Status: " << dec << dsu_get_cpu_state(0) << endl; // 1 = power down, 0 = running
+	cout << "CPU 2 Status: " << dec << dsu_get_cpu_state(1) << endl; // 1 = power down, 0 = running
 
 	cout << "done!" << endl;
 }
