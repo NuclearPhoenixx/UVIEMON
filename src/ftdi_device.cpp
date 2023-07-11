@@ -501,6 +501,12 @@ void FTDIDevice::runCPU(BYTE cpuID)
 	this->iowrite32(0x80000008, 0x0826e028);
 	this->iowrite32(0x8000000c, 0x00000028);
 
+	/* make sure all timers are stopped, in particular timer 4 (watchdog) */
+	this->iowrite32(0x80000318, 0x0);
+	this->iowrite32(0x80000328, 0x0);
+	this->iowrite32(0x80000338, 0x0);
+	this->iowrite32(0x80000348, 0x0);
+
 	// Stop the CPU core, set it to the beginning of the memory and wake it up again to execute the binary in memory
 	cout << dec << "Halt Mode: " << dsu_get_cpu_in_halt_mode(cpuID) << " Error Mode: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
 	cout << "CPU 1 Status: " << dec << dsu_get_cpu_state(0) << endl; // 1 = power down, 0 = running

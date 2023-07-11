@@ -378,6 +378,7 @@ uint32_t dsu_get_cpu_in_error_mode(uint32_t cpu)
 
 void dsu_clear_cpu_error_mode(uint32_t cpu)
 {
+	//dsu_clear_dsu_ctrl(cpu, DSU_CTRL_PE);
 	dsu_set_dsu_ctrl(cpu, DSU_CTRL_PE);
 }
 
