@@ -441,6 +441,8 @@ void FTDIDevice::_initCore2Idle()
 	// Resume cpu 1
 	dsu_clear_force_debug_on_watchpoint(1);
 
+	dsu_clear_cpu_error_mode(1);
+
 	cout << "done!" << endl;
 }
 
@@ -469,6 +471,36 @@ void FTDIDevice::runCPU(BYTE cpuID)
 	}
 	dwNumBytesToSend = 0; // Reset output buffer pointer
 	*/
+
+	/* make sure the memcfg regs are set properly
+	 * XXX should be part of a board_init(), for now these are values which
+	 * are guaranteed to work with the GR712RC eval board only!
+	 *
+	 * NOTE: this is done by probing the SRAM/SDRAM range via the BANK_SIZE
+	 * setting in the MEMCFG regs; there you adjust the total size and write
+	 * to one of the last few words in the bank, then shrink it by one power
+	 * of 2 and repeat; when the minimum bank size is reached, do the
+	 * reverse and read back the values. these should be unique, e.g.
+	 * the actual address i.e. always store 0x4ffffffc to 0x4ffffffc
+	 * and so on. If you read back the expected value, that is a verified
+	 * upper limit of the bank; adjust up one power of 2 and repeat until
+	 * you get nonsense back or the maximum bank size is reached.
+	 * In other words:
+	 *	1) BS = 0x200000, write 0x1fffc to last dword at 0x1fffc
+	 *	2) reduce SRAM BANK SIZE config by 1
+	 *	3) BS is now 0x10000, write 0xfffc to 0xfffc
+	 *	4) repeat until bank size config is 0 => 8 kiB bank
+	 *	5) now read back from 0x1ffc
+	 *	6) if result == 0x1ffc, range is valid, increase bank size pwr by 1
+	 *	7) now read back from 0x3ffc
+	 *	8) if result == 0x3ffc, range is valid, increase bank size pwr by 1
+	 *	   else end of physical ram was reached, decrement bank size by one
+	 */
+	this->iowrite32(0x80000000, 0x0003c0ff);
+	this->iowrite32(0x80000004, 0x9a20546a);
+	this->iowrite32(0x80000008, 0x0826e028);
+	this->iowrite32(0x8000000c, 0x00000028);
+
 
 	// Stop the CPU core, set it to the beginning of the memory and wake it up again to execute the binary in memory
 	cout << dec << "Halt Mode: " << dsu_get_cpu_in_halt_mode(cpuID) << " Error Mode: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
@@ -504,6 +536,7 @@ void FTDIDevice::runCPU(BYTE cpuID)
 	dsu_set_cpu_wake_up(cpuID); // CPU wake from setup.c
 	dsu_clear_cpu_break_on_iu_watchpoint(cpuID);
 	dsu_clear_force_debug_on_watchpoint(cpuID); // Resume cpu
+	dsu_clear_cpu_error_mode(cpuID);
 
 	this->iowrite32(0x90000000, 0x000002ef); // ACTUALLY RESUMES CPU (kind of)...
 
