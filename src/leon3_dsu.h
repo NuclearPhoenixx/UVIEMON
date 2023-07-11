@@ -254,6 +254,7 @@ void dsu_set_reg_tbr(uint32_t cpu, uint32_t val);
 void dsu_set_reg_pc(uint32_t cpu, uint32_t val);
 void dsu_set_reg_npc(uint32_t cpu, uint32_t val);
 uint32_t dsu_get_reg_npc(uint32_t cpu);
+void dsu_clear_cpu_halt_mode(uint32_t cpu);
 void dsu_clear_iu_reg_file(uint32_t cpu);
 void dsu_clear_cpu_debug_on_error(uint32_t cpu);
 void dsu_clear_cpu_break_on_iu_watchpoint(uint32_t cpu);

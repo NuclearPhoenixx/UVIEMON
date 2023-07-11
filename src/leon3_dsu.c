@@ -398,6 +398,22 @@ uint32_t dsu_get_cpu_in_halt_mode(uint32_t cpu)
 
 
 /**
+ * @brief clear cpu halt mode and resume core
+ *
+ * @param cpu the cpu number
+ *
+ * @see GR712-UM v2.3 pp. 82
+ */
+
+void dsu_clear_cpu_halt_mode(uint32_t cpu)
+{
+	uint32_t tmp  = ioread32be((uint32_t) (DSU_CTRL + DSU_OFFSET_CPU(cpu)));
+	tmp &= ~(1 << 10);
+	iowrite32be(tmp,  (uint32_t) (DSU_CTRL + DSU_OFFSET_CPU(cpu)));
+}
+
+
+/**
  * @brief  put cpu in halt mode
  *
  * @param cpu the cpu number
