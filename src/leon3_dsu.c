@@ -364,6 +364,7 @@ void dsu_clear_force_debug_on_watchpoint(uint32_t cpu)
 uint32_t dsu_get_cpu_in_error_mode(uint32_t cpu)
 {
 	return ((dsu_get_dsu_ctrl(cpu) & DSU_CTRL_PE) >> 9) & 1;
+	//return dsu_get_dsu_ctrl(cpu);
 }
 
 
@@ -377,7 +378,7 @@ uint32_t dsu_get_cpu_in_error_mode(uint32_t cpu)
 
 void dsu_clear_cpu_error_mode(uint32_t cpu)
 {
-	dsu_clear_dsu_ctrl(cpu, DSU_CTRL_PE);
+	dsu_set_dsu_ctrl(cpu, DSU_CTRL_PE);
 }
 
 
@@ -407,9 +408,7 @@ uint32_t dsu_get_cpu_in_halt_mode(uint32_t cpu)
 
 void dsu_clear_cpu_halt_mode(uint32_t cpu)
 {
-	uint32_t tmp  = ioread32be((uint32_t) (DSU_CTRL + DSU_OFFSET_CPU(cpu)));
-	tmp &= ~(1 << 10);
-	iowrite32be(tmp,  (uint32_t) (DSU_CTRL + DSU_OFFSET_CPU(cpu)));
+	dsu_clear_dsu_ctrl(cpu, DSU_CTRL_HL);
 }
 
 
