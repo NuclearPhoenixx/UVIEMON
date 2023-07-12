@@ -33,7 +33,8 @@ private:
 	FT_STATUS _initMPSSEMode();
 	FT_STATUS _resetJTAGStateMachine();
 
-	void _initCore2Idle();
+	void _initCore1();
+	void _initCore2();
 
 public:
 	FTDIDevice();  // Constructor
