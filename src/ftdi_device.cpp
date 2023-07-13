@@ -546,10 +546,10 @@ void FTDIDevice::runCPU(BYTE cpuID)
 	cout << hex << "Trap Reg: 0x" << uppercase << dsu_get_reg_trap(cpuID) << endl;
 	cout << endl;
 
-	dsu_set_cpu_wake_up(cpuID); // CPU wake from setup.c
-	// dsu_clear_cpu_break_on_iu_watchpoint(cpuID); // Not strictly needed with the iowrite down below
-	dsu_clear_force_debug_on_watchpoint(cpuID); // Needed to resume cpu
-	// dsu_clear_cpu_error_mode(cpuID);			 // Not strictly needed with the iowrite down below
+	dsu_set_cpu_wake_up(cpuID);					 // CPU wake from setup.c
+	dsu_clear_cpu_break_on_iu_watchpoint(cpuID); // Not strictly needed with the iowrite down below
+	dsu_clear_force_debug_on_watchpoint(cpuID);	 // Needed to resume cpu
+	dsu_clear_cpu_error_mode(cpuID);			 // Not strictly needed with the iowrite down below
 
 	this->iowrite32(0x90000000, 0x000002ef); // ACTUALLY RESUMES CPU
 
