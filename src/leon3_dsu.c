@@ -365,6 +365,7 @@ uint32_t dsu_get_cpu_in_error_mode(uint32_t cpu)
 {
 	return ((dsu_get_dsu_ctrl(cpu) & DSU_CTRL_PE) >> 9) & 1;
 	//return dsu_get_dsu_ctrl(cpu);
+	//return ioread32be((uint32_t) DSU_CTRL);
 }
 
 
@@ -380,6 +381,22 @@ void dsu_clear_cpu_error_mode(uint32_t cpu)
 {
 	//dsu_clear_dsu_ctrl(cpu, DSU_CTRL_PE);
 	dsu_set_dsu_ctrl(cpu, DSU_CTRL_PE);
+}
+
+
+/**
+ * @brief read out the DSU trap register; ONLY WORKS FOR ONE PROCESSOR ATM!
+ *
+ * @param cpu the cpu number
+ *
+ * @return trap register content
+ *
+ * @see GR712-UM v2.3 pp. 82
+ */
+
+uint32_t dsu_get_reg_trap(uint32_t cpu)
+{
+	return ioread32be((uint32_t) DSU_REG_TRAP);
 }
 
 
