@@ -178,7 +178,7 @@ static void dsu_set_dsu_ctrl(uint32_t cpu, uint32_t flags)
  * @return the contents of the DSU control register
  */
 
-static uint32_t dsu_get_dsu_ctrl(uint32_t cpu)
+uint32_t dsu_get_dsu_ctrl(uint32_t cpu)
 {
 	return ioread32be((uint32_t) (DSU_CTRL + DSU_OFFSET_CPU(cpu)));
 }
@@ -364,8 +364,6 @@ void dsu_clear_force_debug_on_watchpoint(uint32_t cpu)
 uint32_t dsu_get_cpu_in_error_mode(uint32_t cpu)
 {
 	return ((dsu_get_dsu_ctrl(cpu) & DSU_CTRL_PE) >> 9) & 1;
-	//return dsu_get_dsu_ctrl(cpu);
-	//return ioread32be((uint32_t) DSU_CTRL);
 }
 
 
@@ -397,6 +395,22 @@ void dsu_clear_cpu_error_mode(uint32_t cpu)
 uint32_t dsu_get_reg_trap(uint32_t cpu)
 {
 	return ioread32be((uint32_t) DSU_REG_TRAP);
+}
+
+
+/**
+ * @brief check if cpu is in debug mode
+ *
+ * @param cpu the cpu number
+ *
+ * @return 1 if processor in debug mode, else 0
+ *
+ * @see GR712-UM v2.3 pp. 82
+ */
+
+uint32_t dsu_get_cpu_in_debug_mode(uint32_t cpu)
+{
+	return ((dsu_get_dsu_ctrl(cpu) & DSU_CTRL_DM) >> 6) & 1;
 }
 
 
