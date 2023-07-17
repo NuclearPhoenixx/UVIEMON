@@ -34,4 +34,6 @@ void load(FTDIDevice &handle, std::string &path);
 void verify(FTDIDevice &handle, std::string &path); // Really slow because sequential reads are dead slow
 void run(FTDIDevice &handle);
 
+void reset(FTDIDevice &handle);
+
 #endif /* UVIEMON_CLI_HPP */

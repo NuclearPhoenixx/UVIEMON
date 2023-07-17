@@ -371,6 +371,10 @@ void console()
 		{
 			run(device);
 		}
+		else if (words[0] == "reset")
+		{
+			reset(device);
+		}
 		else if (words[0] == "exit")
 		{
 			break;

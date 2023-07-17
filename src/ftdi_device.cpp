@@ -485,6 +485,24 @@ void FTDIDevice::_initCore2()
 	cout << "done!" << endl;
 }
 
+void FTDIDevice::reset(BYTE cpuID)
+{
+	dsu_set_reg_y(cpuID, 0x0);	  // Clear Y register
+	dsu_set_reg_psr(cpuID, 0x0);  // Clear PSR register
+	dsu_set_reg_wim(cpuID, 0x0);  // Clear WIM register
+	dsu_set_reg_tbr(cpuID, 0x0);  // Clear TBR register
+	dsu_set_reg_pc(cpuID, 0x0);	  // Clear PC register
+	dsu_set_reg_npc(cpuID, 0x0);  // Clear NPC register
+	dsu_set_reg_fsr(cpuID, 0x0);  // Clear FSR register
+	dsu_set_reg_cpsr(cpuID, 0x0); // Clear CPSR register
+
+	dsu_clear_iu_reg_file(cpuID); //  Clear IU register file
+
+	// TODO: Clear FPU register file
+
+	dsu_clear_cpu_error_mode(cpuID); // Clear PE bit of CPU 1
+}
+
 void FTDIDevice::runCPU(BYTE cpuID)
 {
 	// Stop the CPU core, set it to the beginning of the memory and wake it up again to execute the binary in memory

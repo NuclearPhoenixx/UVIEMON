@@ -416,3 +416,10 @@ void run(FTDIDevice &handle)
 	// TODO: Check if successfull, check for errors or OK exits
 	// TODO: UART output
 }
+
+void reset(FTDIDevice &handle)
+{
+	cout << "Resetting... ";
+	handle.reset();
+	cout << "OK!" << endl;
+}
