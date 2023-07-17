@@ -268,6 +268,9 @@ void dsu_clear_force_debug_on_watchpoint(uint32_t cpu);
 void dsu_clear_cpu_halt_mode(uint32_t cpu);
 void dsu_clear_cpu_error_mode(uint32_t cpu);
 void dsu_set_reg_wim(uint32_t cpu, uint32_t val);
+void dsu_set_reg_cpsr(uint32_t cpu, uint32_t val);
+void dsu_set_reg_y(uint32_t cpu, uint32_t val);
+void dsu_set_reg_fsr(uint32_t cpu, uint32_t val);
 void dsu_set_reg_sp(uint32_t cpu, uint32_t cwp, uint32_t val);
 void dsu_set_reg_fp(uint32_t cpu, uint32_t cwp, uint32_t val);
 
