@@ -487,30 +487,6 @@ void FTDIDevice::_initCore2()
 
 void FTDIDevice::runCPU(BYTE cpuID)
 {
-	/*
-	BYTE byOutputBuffer[10];	// Buffer to hold MPSSE commands and data to be sent to the FT2232H
-	DWORD dwNumBytesToSend = 0; // Index to the output buffer
-	DWORD dwNumBytesSent = 0;	// Count of actual bytes sent - used with FT_Write
-
-	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
-	{
-		return;
-	}
-
-	// Goto Run-Test/Idle
-	byOutputBuffer[dwNumBytesToSend++] = 0x4B;													 // Clock out TMS without read
-	byOutputBuffer[dwNumBytesToSend++] = 0x00;													 // Number of clock pulses = Length + 1 (1 bit here)
-	byOutputBuffer[dwNumBytesToSend++] = 0b00000000;											 // Data is shifted LSB first
-	FT_STATUS ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
-
-	if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
-	{
-		cerr << "Error while querying ID for device " << _deviceIndex << endl;
-		return;
-	}
-	dwNumBytesToSend = 0; // Reset output buffer pointer
-	*/
-
 	// Stop the CPU core, set it to the beginning of the memory and wake it up again to execute the binary in memory
 	cout << hex << "HM: " << dsu_get_cpu_in_halt_mode(cpuID) << "  DM: " << dsu_get_cpu_in_debug_mode(cpuID) << "  EM: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
 	// cout << hex << "DSU: 0x" << uppercase << dsu_get_dsu_ctrl(cpuID) << endl;
