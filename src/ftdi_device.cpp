@@ -487,6 +487,9 @@ void FTDIDevice::_initCore2()
 
 void FTDIDevice::reset(BYTE cpuID)
 {
+	this->iowrite32(0x90400024, 0x00000002); // Reset DSU ASI register
+	this->iowrite32(0x90700000, 0x00eb800f); // Reset ASI diagnostic access
+
 	dsu_set_reg_y(cpuID, 0x0);	  // Clear Y register
 	dsu_set_reg_psr(cpuID, 0x0);  // Clear PSR register
 	dsu_set_reg_wim(cpuID, 0x0);  // Clear WIM register
@@ -505,6 +508,8 @@ void FTDIDevice::reset(BYTE cpuID)
 
 void FTDIDevice::runCPU(BYTE cpuID)
 {
+	reset(cpuID); // Reset CPU first in case a crash happened in a previous execution
+
 	// Stop the CPU core, set it to the beginning of the memory and wake it up again to execute the binary in memory
 	cout << hex << "HM: " << dsu_get_cpu_in_halt_mode(cpuID) << "  DM: " << dsu_get_cpu_in_debug_mode(cpuID) << "  EM: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
 	// cout << hex << "DSU: 0x" << uppercase << dsu_get_dsu_ctrl(cpuID) << endl;
