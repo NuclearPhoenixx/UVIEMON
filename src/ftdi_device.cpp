@@ -558,7 +558,13 @@ void FTDIDevice::runCPU(BYTE cpuID)
 	cout << hex << "Trap Reg: 0x" << uppercase << dsu_get_reg_trap(cpuID) << endl;
 	cout << endl;
 
-	sleep(5); // Simple dummy execution time
+	bool stopped = dsu_get_cpu_in_debug_mode(cpuID);
+
+	while (!stopped)
+	{
+		sleep(0.01); // Sleep 10 ms between polls
+		stopped = dsu_get_cpu_in_debug_mode(cpuID);
+	}
 
 	cout << hex << "HM: " << dsu_get_cpu_in_halt_mode(cpuID) << "  DM: " << dsu_get_cpu_in_debug_mode(cpuID) << "  EM: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
 	// cout << hex << "DSU: 0x" << uppercase << dsu_get_dsu_ctrl(cpuID) << endl;
