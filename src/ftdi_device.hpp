@@ -57,8 +57,8 @@ public:
 	/*
 		DSU operations for runnning programs
 	*/
-	BYTE runCPU(BYTE cpuID); // 0 or 1 for either core
-	void reset(BYTE cpuID = 0);	 // Resets CPU
+	BYTE runCPU(BYTE cpuID);	// 0 or 1 for either core
+	void reset(BYTE cpuID = 0); // Resets CPU
 
 	/*
 		Memory RW operations
