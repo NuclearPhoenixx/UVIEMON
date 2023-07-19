@@ -584,18 +584,35 @@ BYTE FTDIDevice::runCPU(BYTE cpuID)
 	cout << hex << "Trap Reg: 0x" << dsu_get_reg_trap(cpuID) << endl;
 	*/
 
-	uint32_t trap = dsu_get_reg_trap(cpuID);
-	unsigned int bitmask = (1 << (11 - 4 + 1)) - 1; // Get bits 4 to 11
-	bitmask <<= 4;									// Shift the bitmask to align with the start position
-	unsigned int result = trap & bitmask;			// Use bitwise AND to extract the desired bits
-	result >>= 4;									// Shift the result back to the rightmost position
+	unsigned int bitmask = (1 << (11 - 4 + 1)) - 1;		 // Get bits 4 to 11
+	bitmask <<= 4;										 // Shift the bitmask to align with the start position
+	unsigned int tt = dsu_get_reg_trap(cpuID) & bitmask; // Use bitwise AND to extract the desired bits
+	tt >>= 4;											 // Shift the result back to the rightmost position
 
-	cout << hex << "Trap Type: 0x" << result << endl;
+	unsigned int tbr_tt = dsu_get_reg_tbr(cpuID) & bitmask; // Use bitwise AND to extract the desired bits
+	tbr_tt >>= 4;											// Shift the result back to the rightmost position
+
+	/*
+	cout << hex << "Trap Type: 0x" << tt << endl;
 	cout << hex << "Global Reg: " << dsu_get_global_reg(cpuID, 1) << endl;
-	cout << hex << "CPSR: " << dsu_get_reg_cpsr(cpuID) << endl;
+	cout << hex << "TBR: " << dsu_get_reg_tbr(cpuID) << endl;
+	cout << hex << "TBR TT: " << tbr_tt << endl;
 	cout << endl;
+	*/
 
-	return result;
+	if (tt == 0x80 && tbr_tt != 0x80)
+	{
+		return tbr_tt;
+	}
+
+	/*
+	if (dsu_get_global_reg(cpuID, 1) != 1 && tt == 0x80) // Check if global failed when tt is OK
+	{
+		return 0x82; // Return a Software trap instruction
+	}
+	*/
+
+	return tt;
 }
 
 BYTE FTDIDevice::getJTAGCount()
