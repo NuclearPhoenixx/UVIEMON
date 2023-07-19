@@ -506,16 +506,19 @@ void FTDIDevice::reset(BYTE cpuID)
 	dsu_clear_cpu_error_mode(cpuID); // Clear PE bit of CPU 1
 }
 
-void FTDIDevice::runCPU(BYTE cpuID)
+BYTE FTDIDevice::runCPU(BYTE cpuID)
 {
 	reset(cpuID); // Reset CPU first in case a crash happened in a previous execution
 
-	// Stop the CPU core, set it to the beginning of the memory and wake it up again to execute the binary in memory
+	/*
 	cout << hex << "HM: " << dsu_get_cpu_in_halt_mode(cpuID) << "  DM: " << dsu_get_cpu_in_debug_mode(cpuID) << "  EM: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
 	// cout << hex << "DSU: 0x" << uppercase << dsu_get_dsu_ctrl(cpuID) << endl;
 	// cout << "CPU 1 Status: " << dsu_get_cpu_state(0) << "  CPU 2 Status: " << dsu_get_cpu_state(1) << endl; // 1 = power down, 0 = running
-	cout << hex << "Trap Reg: 0x" << uppercase << dsu_get_reg_trap(cpuID) << endl;
+	cout << hex << "Trap Reg: 0x" << dsu_get_reg_trap(cpuID) << endl;
+	cout << hex << "Global Reg: " << dsu_get_global_reg(cpuID, 1) << endl;
+	cout << hex << "CPSR: " << dsu_get_reg_cpsr(cpuID) << endl;
 	cout << endl;
+	*/
 
 	const uint32_t addr = 0x40000000;
 
@@ -539,11 +542,15 @@ void FTDIDevice::runCPU(BYTE cpuID)
 	dsu_set_reg_sp(cpuID, 1, start);
 	dsu_set_reg_fp(cpuID, 1, start);
 
+	/*
 	cout << hex << "HM: " << dsu_get_cpu_in_halt_mode(cpuID) << "  DM: " << dsu_get_cpu_in_debug_mode(cpuID) << "  EM: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
 	// cout << hex << "DSU: 0x" << uppercase << dsu_get_dsu_ctrl(cpuID) << endl;
 	// cout << "CPU 1 Status: " << dsu_get_cpu_state(0) << "  CPU 2 Status: " << dsu_get_cpu_state(1) << endl; // 1 = power down, 0 = running
-	cout << hex << "Trap Reg: 0x" << uppercase << dsu_get_reg_trap(cpuID) << endl;
+	cout << hex << "Trap Reg: 0x" << dsu_get_reg_trap(cpuID) << endl;
+	cout << hex << "Global Reg: " << dsu_get_global_reg(cpuID, 1) << endl;
+	cout << hex << "CPSR: " << dsu_get_reg_cpsr(cpuID) << endl;
 	cout << endl;
+	*/
 
 	dsu_set_cpu_wake_up(cpuID);					 // CPU wake from setup.c
 	dsu_clear_cpu_break_on_iu_watchpoint(cpuID); // Not strictly needed with the iowrite down below
@@ -552,11 +559,15 @@ void FTDIDevice::runCPU(BYTE cpuID)
 
 	this->iowrite32(0x90000000, 0x000002ef); // ACTUALLY RESUMES CPU
 
+	/*
 	cout << hex << "HM: " << dsu_get_cpu_in_halt_mode(cpuID) << "  DM: " << dsu_get_cpu_in_debug_mode(cpuID) << "  EM: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
 	// cout << hex << "DSU: 0x" << uppercase << dsu_get_dsu_ctrl(cpuID) << endl;
 	// cout << "CPU 1 Status: " << dsu_get_cpu_state(0) << "  CPU 2 Status: " << dsu_get_cpu_state(1) << endl; // 1 = power down, 0 = running
-	cout << hex << "Trap Reg: 0x" << uppercase << dsu_get_reg_trap(cpuID) << endl;
+	cout << hex << "Trap Reg: 0x" << dsu_get_reg_trap(cpuID) << endl;
+	cout << hex << "Global Reg: " << dsu_get_global_reg(cpuID, 1) << endl;
+	cout << hex << "CPSR: " << dsu_get_reg_cpsr(cpuID) << endl;
 	cout << endl;
+	*/
 
 	bool stopped = dsu_get_cpu_in_debug_mode(cpuID);
 
@@ -566,13 +577,25 @@ void FTDIDevice::runCPU(BYTE cpuID)
 		stopped = dsu_get_cpu_in_debug_mode(cpuID);
 	}
 
+	/*
 	cout << hex << "HM: " << dsu_get_cpu_in_halt_mode(cpuID) << "  DM: " << dsu_get_cpu_in_debug_mode(cpuID) << "  EM: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
-	// cout << hex << "DSU: 0x" << uppercase << dsu_get_dsu_ctrl(cpuID) << endl;
-	// cout << "CPU 1 Status: " << dsu_get_cpu_state(0) << "  CPU 2 Status: " << dsu_get_cpu_state(1) << endl; // 1 = power down, 0 = running
-	cout << hex << "Trap Reg: 0x" << uppercase << dsu_get_reg_trap(cpuID) << endl;
+	cout << hex << "DSU: 0x" << uppercase << dsu_get_dsu_ctrl(cpuID) << endl;
+	cout << "CPU 1 Status: " << dsu_get_cpu_state(0) << "  CPU 2 Status: " << dsu_get_cpu_state(1) << endl; // 1 = power down, 0 = running
+	cout << hex << "Trap Reg: 0x" << dsu_get_reg_trap(cpuID) << endl;
+	*/
+
+	uint32_t trap = dsu_get_reg_trap(cpuID);
+	unsigned int bitmask = (1 << (11 - 4 + 1)) - 1; // Get bits 4 to 11
+	bitmask <<= 4;									// Shift the bitmask to align with the start position
+	unsigned int result = trap & bitmask;			// Use bitwise AND to extract the desired bits
+	result >>= 4;									// Shift the result back to the rightmost position
+
+	cout << hex << "Trap Type: 0x" << result << endl;
+	cout << hex << "Global Reg: " << dsu_get_global_reg(cpuID, 1) << endl;
+	cout << hex << "CPSR: " << dsu_get_reg_cpsr(cpuID) << endl;
 	cout << endl;
 
-	cout << "done!" << endl;
+	return result;
 }
 
 BYTE FTDIDevice::getJTAGCount()
