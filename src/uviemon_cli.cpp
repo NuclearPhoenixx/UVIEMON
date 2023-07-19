@@ -457,24 +457,31 @@ void run(FTDIDevice &handle)
 {
 	cout << "Running executable...";
 
-	// TODO: Check if something has been uploaded
-
 	BYTE tt = handle.runCPU(0); // Execute on CPU Core 1
 
-	cout << " Done." << endl;
-	cout << endl;
-	cout << "tt 0x" << hex << (unsigned int)tt << ", ";
-
-	if (tt <= 0x80)
+	if (tt < 0x80) // Hardware traps
 	{
-		cout << tt_errors[tt] << endl;
+		cout << " Error: Hardware trap!" << endl;
+		cout << endl;
+		cout << "tt 0x" << hex << (unsigned int)tt << ", " << tt_errors[tt] << endl;
 	}
-	else
+	else if (tt == 0x80) // Successfull trap
 	{
-		cout << "[trap_instruction]: Software trap instruction (TA)" << endl;
+		cout << " OK!" << endl;
+	}
+	else if (tt > 0x80 && tt <= 0xFF) // Software trap
+	{
+		cout << " Error: Software trap!" << endl;
+		cout << endl;
+		cout << "tt 0x" << hex << (unsigned int)tt << ", [trap_instruction]: Software trap instruction (TA)" << endl;
+	}
+	else // Something else that's not documented
+	{
+		cout << " Error!" << endl;
+		cout << endl;
+		cout << "tt 0x" << hex << (unsigned int)tt << ", [unknown]: unknown trap!" << endl;
 	}
 
-	// TODO: Check if successfull, check for errors or OK exits
 	// TODO: UART output
 }
 
