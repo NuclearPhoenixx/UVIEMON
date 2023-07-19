@@ -131,7 +131,7 @@ static uint32_t dsu_get_input_reg_addr(uint32_t cpu, uint32_t n, uint32_t cwp)
 __attribute__((unused))
 static uint32_t dsu_get_global_reg_addr(uint32_t cpu, uint32_t n)
 {
-	return (DSU_BASE(cpu) + 0x300000 + n * 4);
+    return (DSU_BASE(cpu) + 0x300000 + NWINDOWS * 64 + n * 4);
 }
 
 
