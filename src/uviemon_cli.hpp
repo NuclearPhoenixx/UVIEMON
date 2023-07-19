@@ -14,6 +14,9 @@
 
 #include "ftdi_device.hpp"
 #include <string>
+#include <unordered_map>
+
+extern std::unordered_map<int, std::string> tt_errors;
 
 std::string _hexToString(DWORD *data, size_t size);
 std::string _hexToString(WORD *data, size_t size);

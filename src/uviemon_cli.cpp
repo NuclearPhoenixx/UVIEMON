@@ -18,6 +18,42 @@
 
 using namespace std;
 
+std::unordered_map<int, std::string> tt_errors = {
+	{0x0, "[reset]: Power-on reset"},
+	{0x2b, "[write_error]: write buffer error"},
+	{0x01, "[instruction_access_error]: Error during instruction fetch"},
+	{0x02, "[illegal_instruction]: UNIMP or other un-implemented instruction"},
+	{0x03, "[privileged_instruction]: Execution of privileged instruction in user mode"},
+	{0x04, "[fp_disabled]: FP instruction while FPU disabled"},
+	{0x24, "[cp_disabled]: CP instruction while Co-processor disabled. The GR712RC does not implement a co-processor and CP instructions will trigger this trap "},
+	{0x0B, "[watchpoint_detected]: Hardware breakpoint match"},
+	{0x05, "[window_overflow]: SAVE into invalid window"},
+	{0x06, "[window_underflow]: RESTORE into invalid window"},
+	{0x20, "[register_hadrware_error]: Uncorrectable register file EDAC error"},
+	{0x07, "[mem_address_not_aligned]: Memory access to un-aligned address"},
+	{0x08, "[fp_exception]: FPU exception"},
+	{0x09, "[data_access_exception]: Access error during load or store instruction"},
+	{0x0A, "[tag_overflow]: Tagged arithmetic overflow"},
+	{0x2A, "[divide_exception]: Divide by zero"},
+	{0x11, "[interrupt_level_1]: Asynchronous interrupt 1"},
+	{0x12, "[interrupt_level_2]: Asynchronous interrupt 2"},
+	{0x13, "[interrupt_level_3]: Asynchronous interrupt 3"},
+	{0x14, "[interrupt_level_4]: Asynchronous interrupt 4"},
+	{0x15, "[interrupt_level_5]: Asynchronous interrupt 5"},
+	{0x16, "[interrupt_level_6]: Asynchronous interrupt 6"},
+	{0x17, "[interrupt_level_7]: Asynchronous interrupt 7"},
+	{0x18, "[interrupt_level_8]: Asynchronous interrupt 8"},
+	{0x19, "[interrupt_level_9]: Asynchronous interrupt 9"},
+	{0x1A, "[interrupt_level_10]: Asynchronous interrupt 10"},
+	{0x1B, "[interrupt_level_11]: Asynchronous interrupt 11"},
+	{0x1C, "[interrupt_level_12]: Asynchronous interrupt 12"},
+	{0x1D, "[interrupt_level_13]: Asynchronous interrupt 13"},
+	{0x1E, "[interrupt_level_14]: Asynchronous interrupt 14"},
+	{0x1F, "[interrupt_level_15]: Asynchronous interrupt 15"},
+	{0x80, "[trap_instruction]: OK"}
+	// Anything larger than 0x80 will be some other Software trap instruction (TA)
+};
+
 string _hexToString(DWORD *data, size_t size)
 {
 	BYTE byteArray[size * sizeof(data[0])];
@@ -409,11 +445,24 @@ void verify(FTDIDevice &handle, std::string &path)
 
 void run(FTDIDevice &handle)
 {
-	cout << "Running executable..." << endl;
+	cout << "Running executable...";
 
 	// TODO: Check if something has been uploaded
 
-	handle.runCPU(0); // Execute on CPU Core 1
+	BYTE tt = handle.runCPU(0); // Execute on CPU Core 1
+
+	cout << " Done." << endl;
+	cout << endl;
+	cout << "tt 0x" << hex << (unsigned int)tt << ", ";
+
+	if (tt <= 0x80)
+	{
+		cout << tt_errors[tt] << endl;
+	}
+	else
+	{
+		cout << "[trap_instruction]: Software trap instruction (TA)" << endl;
+	}
 
 	// TODO: Check if successfull, check for errors or OK exits
 	// TODO: UART output
@@ -421,7 +470,7 @@ void run(FTDIDevice &handle)
 
 void reset(FTDIDevice &handle)
 {
-	cout << "Resetting... ";
+	cout << "Resetting...";
 	handle.reset();
-	cout << "Done." << endl;
+	cout << " Done." << endl;
 }
