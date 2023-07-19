@@ -337,7 +337,17 @@ void load(FTDIDevice &handle, string &path)
 	const streamsize size = file.tellg();
 	const uint32_t cutoffSize = 64 * 1024; // Cut off the first 64 kiB of data (ELF-header + alignment section)
 
-	if (size < cutoffSize)
+	if (size == -1)
+	{
+		cerr << "File not found!" << endl;
+		return;
+	}
+	else if (size == 0)
+	{
+		cerr << "File is empty!" << endl;
+		return;
+	}
+	else if (size < cutoffSize)
 	{
 		cerr << "File size is too small! Needs to be at least 64 kiB..." << endl;
 		return;
