@@ -153,6 +153,22 @@ static uint32_t dsu_get_fpu_reg_addr(uint32_t cpu, uint32_t n)
 
 
 /**
+ * @brief get content of the global register %gn
+ * @see GR712-UM v2.3 pp. 81
+ *
+ * @param cpu the cpu number
+ * @param n   the index of the global register %gn
+ *
+ * @return content of register
+ */
+
+uint32_t dsu_get_global_reg(uint32_t cpu, uint32_t n)
+{
+	return ioread32be((uint32_t) dsu_get_global_reg_addr(cpu, n));
+}
+
+
+/**
  * @brief set bits in the DSU control register
  *
  * @param cpu   the cpu number
