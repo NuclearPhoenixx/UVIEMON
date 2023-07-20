@@ -552,8 +552,13 @@ BYTE FTDIDevice::runCPU(BYTE cpuID)
 		if (TCNT_bits > 0)
 		{
 			// Grab all data from UART if available
+			// DWORD data[TCNT_bits];
+
+			// ioread32raw(UART0_FIFO_REG, data, TCNT_bits);
+
 			for (size_t i = 0; i < TCNT_bits; i++)
 			{
+				// cout << (char)data[i] << flush;
 				cout << (char)this->ioread32(UART0_FIFO_REG) << flush;
 			}
 		}
@@ -1175,11 +1180,6 @@ DWORD FTDIDevice::ioread32(DWORD addr)
 		return 0;
 	}
 
-	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
-	{
-		return 0;
-	}
-
 	// Format data
 	return (DWORD)((unsigned char)(byInputBuffer[3]) << 24 | (unsigned char)(byInputBuffer[2]) << 16 | (unsigned char)(byInputBuffer[1]) << 8 | (unsigned char)(byInputBuffer[0]));
 }
@@ -1357,8 +1357,6 @@ void FTDIDevice::ioread32raw(DWORD startAddr, DWORD *data, WORD size)
 		}
 		dwNumBytesToSend = 0; // Reset output buffer pointer
 	}
-
-	_resetJTAGStateMachine(); // Reset back to TLR
 }
 
 void FTDIDevice::ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress)
@@ -1600,12 +1598,7 @@ void FTDIDevice::iowrite8(DWORD addr, BYTE data)
 		cerr << "Error while shifting out data for device " << _deviceIndex << endl;
 		return;
 	}
-	dwNumBytesToSend = 0; // Reset output buffer pointer
-
-	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
-	{
-		return;
-	}
+	// dwNumBytesToSend = 0; // Reset output buffer pointer
 }
 
 void FTDIDevice::iowrite16(DWORD addr, WORD data)
@@ -1789,12 +1782,7 @@ void FTDIDevice::iowrite16(DWORD addr, WORD data)
 		cerr << "Error while shifting out data for device " << _deviceIndex << endl;
 		return;
 	}
-	dwNumBytesToSend = 0; // Reset output buffer pointer
-
-	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
-	{
-		return;
-	}
+	// dwNumBytesToSend = 0; // Reset output buffer pointer
 }
 
 void FTDIDevice::iowrite32(DWORD addr, DWORD data)
@@ -1966,12 +1954,7 @@ void FTDIDevice::iowrite32(DWORD addr, DWORD data)
 		cerr << "Error while shifting out data for device " << _deviceIndex << endl;
 		return;
 	}
-	dwNumBytesToSend = 0; // Reset output buffer pointer
-
-	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
-	{
-		return;
-	}
+	// dwNumBytesToSend = 0; // Reset output buffer pointer
 }
 
 void FTDIDevice::iowrite32raw(DWORD startAddr, DWORD *data, WORD size)
@@ -2163,8 +2146,6 @@ void FTDIDevice::iowrite32raw(DWORD startAddr, DWORD *data, WORD size)
 		}
 		dwNumBytesToSend = 0; // Reset output buffer pointer
 	}
-
-	_resetJTAGStateMachine(); // Reset back to TLR
 }
 
 void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progress)
