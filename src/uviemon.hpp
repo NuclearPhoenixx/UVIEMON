@@ -28,8 +28,6 @@
 */
 extern FTDIDevice device;
 
-// void signalHandler(int signal);
-
 void console();
 void showInfo();
 void showHelp();

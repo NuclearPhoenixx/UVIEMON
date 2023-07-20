@@ -10,25 +10,16 @@
 
 #include "uviemon.hpp"
 
-#include <iostream> // cout and cerr
-#include <cstring>	// Needed for strcmp
-#include <string>	// string for user input/output
-#include <sstream>	// Used in console user input parsing
-// #include <signal.h>			   // Used for catching SIGINT from the user keyboard
+#include <iostream>			   // cout and cerr
+#include <cstring>			   // Needed for strcmp
+#include <string>			   // string for user input/output
+#include <sstream>			   // Used in console user input parsing
 #include <readline/readline.h> // Unix only, needs "libreadline-dev" installed to compile!
 #include <readline/history.h>  // Unix only, needs "libreadline-dev" installed to compile!
 
 using namespace std; // Makes my life easier
 
 FTDIDevice device; // Device handle for the FTDI chip
-
-/*
-void signalHandler(int signal)
-{
-	cout << "Received signal " << signal << ", exiting program..." << endl;
-	exit(signal);
-}
-*/
 
 void console()
 {
@@ -42,7 +33,16 @@ void console()
 
 		if (rawInput != nullptr) // Add the input to the readline history
 		{
-			add_history(rawInput);
+			const char *s = rawInput;
+			while (*s != '\0')
+			{
+				if (!isspace((unsigned char)*s))
+				{
+					add_history(rawInput);
+					break;
+				}
+				s++;
+			}
 		}
 
 		string input(rawInput);
@@ -444,8 +444,6 @@ int main(int argc, char *argv[])
 		showHelp();
 		return 1;
 	}
-
-	// signal(SIGINT, signalHandler); // Install a signal handler for SIGINT
 
 	if (strcmp(argv[1], "-list") == 0)
 	{
