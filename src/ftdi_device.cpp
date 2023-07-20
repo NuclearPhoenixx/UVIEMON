@@ -1405,12 +1405,9 @@ void FTDIDevice::ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress
 
 void FTDIDevice::iowrite8(DWORD addr, BYTE data)
 {
-	BYTE byOutputBuffer[100]; // Buffer to hold MPSSE commands and data to be sent to the FT2232H
-	// BYTE byInputBuffer[100];	// Buffer to hold data read from the FT2232H
+	BYTE byOutputBuffer[100];	// Buffer to hold MPSSE commands and data to be sent to the FT2232H
 	DWORD dwNumBytesToSend = 0; // Index to the output buffer
 	DWORD dwNumBytesSent = 0;	// Count of actual bytes sent - used with FT_Write
-	// DWORD dwNumBytesToRead = 0; // Number of bytes available to read in the driver's input buffer
-	// DWORD dwNumBytesRead = 0;	// Count of actual bytes read - used with FT_Read
 
 	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
 	{
@@ -1436,35 +1433,6 @@ void FTDIDevice::iowrite8(DWORD addr, BYTE data)
 	byOutputBuffer[dwNumBytesToSend++] = 0x4B;		 // Clock out TMS without read
 	byOutputBuffer[dwNumBytesToSend++] = 0x03;		 // Number of clock pulses = Length + 1 (4 clocks here)
 	byOutputBuffer[dwNumBytesToSend++] = 0b00000011; // Data is shifted LSB first, so the TMS pattern is 1100
-
-	/*
-	// Clock out 10 x 8 bits of 0s only to clear out any other values
-	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
-	byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
-	byOutputBuffer[dwNumBytesToSend++] = 0x00;
-	for (BYTE i = 0; i < 10; i++)
-	{
-		byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
-	}
-	// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
-	byOutputBuffer[dwNumBytesToSend++] = 0x2A;													 // Read back bits
-	byOutputBuffer[dwNumBytesToSend++] = 0x07;													 // Length + 1 (8 bits here)
-	FT_STATUS ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
-
-	if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
-	{
-		cerr << "Communication error with JTAG device!" << endl;
-		return;
-	}
-	dwNumBytesToSend = 0; // Reset output buffer pointer
-
-	// Do a read to flush the read buffer, the data is not needed...
-	do
-	{
-		ftStatus = FT_GetQueueStatus(_ftHandle, &dwNumBytesToRead);					   // Get the number of bytes in the device input buffer
-	} while ((dwNumBytesToRead == 0) && (ftStatus == FT_OK));						   // or Timeout
-	ftStatus |= FT_Read(_ftHandle, &byInputBuffer, dwNumBytesToRead, &dwNumBytesRead); // Read out the data from input buffer
-	*/
 
 	// Shift out AHB address DWORD (4 bytes)
 	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
@@ -1522,35 +1490,6 @@ void FTDIDevice::iowrite8(DWORD addr, BYTE data)
 	}
 	dwNumBytesToSend = 0; // Reset output buffer pointer
 
-	/*
-	// Clock out 10 x 8 bits of 0s only to clear out any other values
-	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
-	byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
-	byOutputBuffer[dwNumBytesToSend++] = 0x00;
-	for (BYTE i = 0; i < 10; i++)
-	{
-		byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
-	}
-	// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
-	byOutputBuffer[dwNumBytesToSend++] = 0x2A;										   // Read back bits
-	byOutputBuffer[dwNumBytesToSend++] = 0x07;										   // Length + 1 (8 bits here)
-	ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
-
-	if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
-	{
-		cerr << "Communication error with JTAG device!" << endl;
-		return;
-	}
-	dwNumBytesToSend = 0; // Reset output buffer pointer
-
-	// Do a read to flush the read buffer, the data is not needed...
-	do
-	{
-		ftStatus = FT_GetQueueStatus(_ftHandle, &dwNumBytesToRead);					   // Get the number of bytes in the device input buffer
-	} while ((dwNumBytesToRead == 0) && (ftStatus == FT_OK));						   // or Timeout
-	ftStatus |= FT_Read(_ftHandle, &byInputBuffer, dwNumBytesToRead, &dwNumBytesRead); // Read out the data from input buffer
-	*/
-
 	// Shift out AHB data DWORD (1 byte)
 	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
 	byOutputBuffer[dwNumBytesToSend++] = 0x03; // Length + 1 (4 bytes here)
@@ -1603,12 +1542,9 @@ void FTDIDevice::iowrite8(DWORD addr, BYTE data)
 
 void FTDIDevice::iowrite16(DWORD addr, WORD data)
 {
-	BYTE byOutputBuffer[100]; // Buffer to hold MPSSE commands and data to be sent to the FT2232H
-	// BYTE byInputBuffer[100];	// Buffer to hold data read from the FT2232H
+	BYTE byOutputBuffer[100];	// Buffer to hold MPSSE commands and data to be sent to the FT2232H
 	DWORD dwNumBytesToSend = 0; // Index to the output buffer
 	DWORD dwNumBytesSent = 0;	// Count of actual bytes sent - used with FT_Write
-	// DWORD dwNumBytesToRead = 0; // Number of bytes available to read in the driver's input buffer
-	// DWORD dwNumBytesRead = 0;	// Count of actual bytes read - used with FT_Read
 
 	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
 	{
@@ -1634,35 +1570,6 @@ void FTDIDevice::iowrite16(DWORD addr, WORD data)
 	byOutputBuffer[dwNumBytesToSend++] = 0x4B;		 // Clock out TMS without read
 	byOutputBuffer[dwNumBytesToSend++] = 0x03;		 // Number of clock pulses = Length + 1 (4 clocks here)
 	byOutputBuffer[dwNumBytesToSend++] = 0b00000011; // Data is shifted LSB first, so the TMS pattern is 1100
-
-	/*
-	// Clock out 10 x 8 bits of 0s only to clear out any other values
-	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
-	byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
-	byOutputBuffer[dwNumBytesToSend++] = 0x00;
-	for (BYTE i = 0; i < 10; i++)
-	{
-		byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
-	}
-	// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
-	byOutputBuffer[dwNumBytesToSend++] = 0x2A;													 // Read back bits
-	byOutputBuffer[dwNumBytesToSend++] = 0x07;													 // Length + 1 (8 bits here)
-	FT_STATUS ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
-
-	if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
-	{
-		cerr << "Communication error with JTAG device!" << endl;
-		return;
-	}
-	dwNumBytesToSend = 0; // Reset output buffer pointer
-
-	// Do a read to flush the read buffer, the data is not needed...
-	do
-	{
-		ftStatus = FT_GetQueueStatus(_ftHandle, &dwNumBytesToRead);					   // Get the number of bytes in the device input buffer
-	} while ((dwNumBytesToRead == 0) && (ftStatus == FT_OK));						   // or Timeout
-	ftStatus |= FT_Read(_ftHandle, &byInputBuffer, dwNumBytesToRead, &dwNumBytesRead); // Read out the data from input buffer
-	*/
 
 	// Shift out AHB address DWORD (4 bytes)
 	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
@@ -1720,35 +1627,6 @@ void FTDIDevice::iowrite16(DWORD addr, WORD data)
 	}
 	dwNumBytesToSend = 0; // Reset output buffer pointer
 
-	/*
-	// Clock out 10 x 8 bits of 0s only to clear out any other values
-	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
-	byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
-	byOutputBuffer[dwNumBytesToSend++] = 0x00;
-	for (BYTE i = 0; i < 10; i++)
-	{
-		byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
-	}
-	// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
-	byOutputBuffer[dwNumBytesToSend++] = 0x2A;										   // Read back bits
-	byOutputBuffer[dwNumBytesToSend++] = 0x07;										   // Length + 1 (8 bits here)
-	ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
-
-	if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
-	{
-		cerr << "Communication error with JTAG device!" << endl;
-		return;
-	}
-	dwNumBytesToSend = 0; // Reset output buffer pointer
-
-	// Do a read to flush the read buffer, the data is not needed...
-	do
-	{
-		ftStatus = FT_GetQueueStatus(_ftHandle, &dwNumBytesToRead);					   // Get the number of bytes in the device input buffer
-	} while ((dwNumBytesToRead == 0) && (ftStatus == FT_OK));						   // or Timeout
-	ftStatus |= FT_Read(_ftHandle, &byInputBuffer, dwNumBytesToRead, &dwNumBytesRead); // Read out the data from input buffer
-	*/
-
 	// Shift out AHB data WORD (2 bytes)
 	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
 	byOutputBuffer[dwNumBytesToSend++] = 0x03; // Length + 1 (4 bytes here)
@@ -1787,12 +1665,9 @@ void FTDIDevice::iowrite16(DWORD addr, WORD data)
 
 void FTDIDevice::iowrite32(DWORD addr, DWORD data)
 {
-	BYTE byOutputBuffer[100]; // Buffer to hold MPSSE commands and data to be sent to the FT2232H
-	// BYTE byInputBuffer[100];	// Buffer to hold data read from the FT2232H
+	BYTE byOutputBuffer[100];	// Buffer to hold MPSSE commands and data to be sent to the FT2232H
 	DWORD dwNumBytesToSend = 0; // Index to the output buffer
 	DWORD dwNumBytesSent = 0;	// Count of actual bytes sent - used with FT_Write
-	// DWORD dwNumBytesToRead = 0; // Number of bytes available to read in the driver's input buffer
-	// DWORD dwNumBytesRead = 0;	// Count of actual bytes read - used with FT_Read
 
 	if (_resetJTAGStateMachine() != FT_OK) // Reset back to TLR
 	{
@@ -1818,35 +1693,6 @@ void FTDIDevice::iowrite32(DWORD addr, DWORD data)
 	byOutputBuffer[dwNumBytesToSend++] = 0x4B;		 // Clock out TMS without read
 	byOutputBuffer[dwNumBytesToSend++] = 0x03;		 // Number of clock pulses = Length + 1 (4 clocks here)
 	byOutputBuffer[dwNumBytesToSend++] = 0b00000011; // Data is shifted LSB first, so the TMS pattern is 1100
-
-	/*
-	// Clock out 10 x 8 bits of 0s only to clear out any other values
-	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
-	byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
-	byOutputBuffer[dwNumBytesToSend++] = 0x00;
-	for (BYTE i = 0; i < 10; i++)
-	{
-		byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
-	}
-	// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
-	byOutputBuffer[dwNumBytesToSend++] = 0x2A;													 // Read back bits
-	byOutputBuffer[dwNumBytesToSend++] = 0x07;													 // Length + 1 (8 bits here)
-	FT_STATUS ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
-
-	if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
-	{
-		cerr << "Communication error with JTAG device!" << endl;
-		return;
-	}
-	dwNumBytesToSend = 0; // Reset output buffer pointer
-
-	// Do a read to flush the read buffer, the data is not needed...
-	do
-	{
-		ftStatus = FT_GetQueueStatus(_ftHandle, &dwNumBytesToRead);					   // Get the number of bytes in the device input buffer
-	} while ((dwNumBytesToRead == 0) && (ftStatus == FT_OK));						   // or Timeout
-	ftStatus |= FT_Read(_ftHandle, &byInputBuffer, dwNumBytesToRead, &dwNumBytesRead); // Read out the data from input buffer
-	*/
 
 	// Shift out AHB address DWORD (4 bytes)
 	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
@@ -1903,35 +1749,6 @@ void FTDIDevice::iowrite32(DWORD addr, DWORD data)
 		return;
 	}
 	dwNumBytesToSend = 0; // Reset output buffer pointer
-
-	/*
-	// Clock out 10 x 8 bits of 0s only to clear out any other values
-	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
-	byOutputBuffer[dwNumBytesToSend++] = 0x09; // Length + 1 (10 bytes here)
-	byOutputBuffer[dwNumBytesToSend++] = 0x00;
-	for (BYTE i = 0; i < 10; i++)
-	{
-		byOutputBuffer[dwNumBytesToSend++] = 0x00; // Zeros only
-	}
-	// Clock out Read: FIXES SOME ISSUES; I DONT KNOW WHY?!
-	byOutputBuffer[dwNumBytesToSend++] = 0x2A;										   // Read back bits
-	byOutputBuffer[dwNumBytesToSend++] = 0x07;										   // Length + 1 (8 bits here)
-	ftStatus = FT_Write(_ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent); // Send off the TMS command
-
-	if (ftStatus != FT_OK || dwNumBytesSent != dwNumBytesToSend)
-	{
-		cerr << "Communication error with JTAG device!" << endl;
-		return;
-	}
-	dwNumBytesToSend = 0; // Reset output buffer pointer
-
-	// Do a read to flush the read buffer, the data is not needed...
-	do
-	{
-		ftStatus = FT_GetQueueStatus(_ftHandle, &dwNumBytesToRead);					   // Get the number of bytes in the device input buffer
-	} while ((dwNumBytesToRead == 0) && (ftStatus == FT_OK));						   // or Timeout
-	ftStatus |= FT_Read(_ftHandle, &byInputBuffer, dwNumBytesToRead, &dwNumBytesRead); // Read out the data from input buffer
-	*/
 
 	// Shift out AHB data DWORD (4 bytes)
 	byOutputBuffer[dwNumBytesToSend++] = 0x19; // Clock bytes out without read
