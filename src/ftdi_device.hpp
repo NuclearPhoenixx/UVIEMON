@@ -24,6 +24,10 @@ const BYTE RW_DWORD = 0b0000010; // 10 for 32-bit DWORD
 const BYTE RW_WORD = 0b0000001;	 // 01 for 16-bit WORD
 const BYTE RW_BYTE = 0b00000000; // 00 for 8-bit BYTE
 
+const DWORD UART0_STATUS_REG = 0x80000104;
+const DWORD UART0_CTRL_REG = 0x80000108;
+const DWORD UART0_FIFO_REG = 0x80000110;
+
 class FTDIDevice
 {
 private:

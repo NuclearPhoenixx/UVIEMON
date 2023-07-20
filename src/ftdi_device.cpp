@@ -501,7 +501,7 @@ void FTDIDevice::reset(BYTE cpuID)
 
 	dsu_clear_iu_reg_file(cpuID); //  Clear IU register file
 
-	// TODO: Clear FPU register file
+	// Optional: Clear FPU register file, not actually strictly needed
 
 	dsu_clear_cpu_error_mode(cpuID); // Clear PE bit of CPU 1
 }
@@ -509,16 +509,6 @@ void FTDIDevice::reset(BYTE cpuID)
 BYTE FTDIDevice::runCPU(BYTE cpuID)
 {
 	reset(cpuID); // Reset CPU first in case a crash happened in a previous execution
-
-	/*
-	cout << hex << "HM: " << dsu_get_cpu_in_halt_mode(cpuID) << "  DM: " << dsu_get_cpu_in_debug_mode(cpuID) << "  EM: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
-	// cout << hex << "DSU: 0x" << uppercase << dsu_get_dsu_ctrl(cpuID) << endl;
-	// cout << "CPU 1 Status: " << dsu_get_cpu_state(0) << "  CPU 2 Status: " << dsu_get_cpu_state(1) << endl; // 1 = power down, 0 = running
-	cout << hex << "Trap Reg: 0x" << dsu_get_reg_trap(cpuID) << endl;
-	cout << hex << "Global Reg: " << dsu_get_global_reg(cpuID, 1) << endl;
-	cout << hex << "CPSR: " << dsu_get_reg_cpsr(cpuID) << endl;
-	cout << endl;
-	*/
 
 	const uint32_t addr = 0x40000000;
 
@@ -542,15 +532,7 @@ BYTE FTDIDevice::runCPU(BYTE cpuID)
 	dsu_set_reg_sp(cpuID, 1, start);
 	dsu_set_reg_fp(cpuID, 1, start);
 
-	/*
-	cout << hex << "HM: " << dsu_get_cpu_in_halt_mode(cpuID) << "  DM: " << dsu_get_cpu_in_debug_mode(cpuID) << "  EM: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
-	// cout << hex << "DSU: 0x" << uppercase << dsu_get_dsu_ctrl(cpuID) << endl;
-	// cout << "CPU 1 Status: " << dsu_get_cpu_state(0) << "  CPU 2 Status: " << dsu_get_cpu_state(1) << endl; // 1 = power down, 0 = running
-	cout << hex << "Trap Reg: 0x" << dsu_get_reg_trap(cpuID) << endl;
-	cout << hex << "Global Reg: " << dsu_get_global_reg(cpuID, 1) << endl;
-	cout << hex << "CPSR: " << dsu_get_reg_cpsr(cpuID) << endl;
-	cout << endl;
-	*/
+	this->iowrite32(UART0_CTRL_REG, 0x00000843); // Set TE, RE, DB, LB bits 1 and clear all other parameters on UART0
 
 	dsu_set_cpu_wake_up(cpuID);					 // CPU wake from setup.c
 	dsu_clear_cpu_break_on_iu_watchpoint(cpuID); // Not strictly needed with the iowrite down below
@@ -559,30 +541,28 @@ BYTE FTDIDevice::runCPU(BYTE cpuID)
 
 	this->iowrite32(0x90000000, 0x000002ef); // ACTUALLY RESUMES CPU
 
-	/*
-	cout << hex << "HM: " << dsu_get_cpu_in_halt_mode(cpuID) << "  DM: " << dsu_get_cpu_in_debug_mode(cpuID) << "  EM: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
-	// cout << hex << "DSU: 0x" << uppercase << dsu_get_dsu_ctrl(cpuID) << endl;
-	// cout << "CPU 1 Status: " << dsu_get_cpu_state(0) << "  CPU 2 Status: " << dsu_get_cpu_state(1) << endl; // 1 = power down, 0 = running
-	cout << hex << "Trap Reg: 0x" << dsu_get_reg_trap(cpuID) << endl;
-	cout << hex << "Global Reg: " << dsu_get_global_reg(cpuID, 1) << endl;
-	cout << hex << "CPSR: " << dsu_get_reg_cpsr(cpuID) << endl;
-	cout << endl;
-	*/
-
-	bool stopped = dsu_get_cpu_in_debug_mode(cpuID);
+	bool stopped = false;
+	const unsigned int mask = 0x3F00000; // Create a mask with bits 20 to 25 set to 1 (0b11111100000000000000000000) to get TCNT
 
 	while (!stopped)
 	{
-		sleep(0.01); // Sleep 10 ms between polls
-		stopped = dsu_get_cpu_in_debug_mode(cpuID);
-	}
+		DWORD status_reg = this->ioread32(UART0_STATUS_REG);
+		unsigned int TCNT_bits = (status_reg & mask) >> 20; // Use bitwise AND to extract the bits, i.e. number of data frames in the transmitter FIFO
 
-	/*
-	cout << hex << "HM: " << dsu_get_cpu_in_halt_mode(cpuID) << "  DM: " << dsu_get_cpu_in_debug_mode(cpuID) << "  EM: " << dsu_get_cpu_in_error_mode(cpuID) << endl;
-	cout << hex << "DSU: 0x" << uppercase << dsu_get_dsu_ctrl(cpuID) << endl;
-	cout << "CPU 1 Status: " << dsu_get_cpu_state(0) << "  CPU 2 Status: " << dsu_get_cpu_state(1) << endl; // 1 = power down, 0 = running
-	cout << hex << "Trap Reg: 0x" << dsu_get_reg_trap(cpuID) << endl;
-	*/
+		if (TCNT_bits > 0)
+		{
+			// Grab all data from UART if available
+			for (size_t i = 0; i < TCNT_bits; i++)
+			{
+				cout << (char)this->ioread32(UART0_FIFO_REG) << flush;
+			}
+		}
+		else
+		{
+			// UART is empty, don't know if it's done or it crashed, check debug mode
+			stopped = dsu_get_cpu_in_debug_mode(cpuID);
+		}
+	}
 
 	unsigned int bitmask = (1 << (11 - 4 + 1)) - 1;		 // Get bits 4 to 11
 	bitmask <<= 4;										 // Shift the bitmask to align with the start position
@@ -592,20 +572,12 @@ BYTE FTDIDevice::runCPU(BYTE cpuID)
 	unsigned int tbr_tt = dsu_get_reg_tbr(cpuID) & bitmask; // Use bitwise AND to extract the desired bits
 	tbr_tt >>= 4;											// Shift the result back to the rightmost position
 
-	/*
-	cout << hex << "Trap Type: 0x" << tt << endl;
-	cout << hex << "Global Reg: " << dsu_get_global_reg(cpuID, 1) << endl;
-	cout << hex << "TBR: " << dsu_get_reg_tbr(cpuID) << endl;
-	cout << hex << "TBR TT: " << tbr_tt << endl;
-	cout << endl;
-	*/
-
 	if (tt == 0x80 && tbr_tt != 0x80)
 	{
 		return tbr_tt;
 	}
 
-	/*
+	/* Actually not needed because we're monitoring both DSU reg and TBR reg
 	if (dsu_get_global_reg(cpuID, 1) != 1 && tt == 0x80) // Check if global failed when tt is OK
 	{
 		return 0x82; // Return a Software trap instruction
