@@ -14,7 +14,7 @@
 		grmon --help								--> uviemon -help
 
 
-	ISSUE: ISO C++ forbids variable length array
+	ISSUE: ISO C++ forbids variable length array (works anyways, it's just complaining)
 */
 
 #include "ftdi_device.hpp"

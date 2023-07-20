@@ -76,7 +76,7 @@ public:
 	void iowrite32(DWORD addr, DWORD data);
 
 	// Sequential RW w/ optional progress output
-	void ioread32raw(DWORD startAddr, DWORD *data, WORD size); // Extremely  (!) slow, it's actually faster to write data...
+	void ioread32raw(DWORD startAddr, DWORD *data, WORD size); // Extremely slow, it's actually faster to write data...
 	void iowrite32raw(DWORD startAddr, DWORD *data, WORD size);
 	void ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress = false);
 	void iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progress = false);
