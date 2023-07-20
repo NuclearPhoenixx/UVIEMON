@@ -455,34 +455,30 @@ void verify(FTDIDevice &handle, std::string &path)
 
 void run(FTDIDevice &handle)
 {
-	cout << "Running executable...";
-
 	BYTE tt = handle.runCPU(0); // Execute on CPU Core 1
 
 	if (tt < 0x80) // Hardware traps
 	{
-		cout << " Error: Hardware trap!" << endl;
-		cout << endl;
-		cout << "tt 0x" << hex << (unsigned int)tt << ", " << tt_errors[tt] << endl;
+		cerr << " => Error: Hardware trap!" << endl;
+		cerr << endl;
+		cerr << "tt 0x" << hex << (unsigned int)tt << ", " << tt_errors[tt] << endl;
 	}
 	else if (tt == 0x80) // Successfull trap
 	{
-		cout << " OK!" << endl;
+		cout << " => OK!" << endl;
 	}
 	else if (tt > 0x80 && tt <= 0xFF) // Software trap
 	{
-		cout << " Error: Software trap!" << endl;
-		cout << endl;
-		cout << "tt 0x" << hex << (unsigned int)tt << ", [trap_instruction]: Software trap instruction (TA)" << endl;
+		cerr << " => Error: Software trap!" << endl;
+		cerr << endl;
+		cerr << "tt 0x" << hex << (unsigned int)tt << ", [trap_instruction]: Software trap instruction (TA)" << endl;
 	}
 	else // Something else that's not documented
 	{
-		cout << " Error!" << endl;
-		cout << endl;
-		cout << "tt 0x" << hex << (unsigned int)tt << ", [unknown]: unknown trap!" << endl;
+		cerr << " => Error!" << endl;
+		cerr << endl;
+		cerr << "tt 0x" << hex << (unsigned int)tt << ", [unknown]: unknown trap!" << endl;
 	}
-
-	// TODO: UART output
 }
 
 void reset(FTDIDevice &handle)
