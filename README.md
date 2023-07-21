@@ -13,5 +13,3 @@ g++ -o uviemon *.cpp *.c -L./lib/ftdi/build/ -lftd2xx -lreadline -Wall -O -pthre
 ```text
 git submodule update --init --recursive
 ```
-
-**TODO:** All the rest
