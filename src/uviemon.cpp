@@ -394,6 +394,8 @@ void showInfo()
 	cout << "Replacement Tool for grmon used in SMILE mission debugging." << endl;
 	cout << "March 2023 and later." << endl;
 	cout << endl;
+	cout << "Source Code: https://github.com/Phoenix1747/uviemon" << endl;
+	cout << endl;
 
 	FT_STATUS ftStatus;
 	DWORD dwLibraryVer;
