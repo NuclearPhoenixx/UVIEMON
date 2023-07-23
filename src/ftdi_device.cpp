@@ -532,12 +532,12 @@ BYTE FTDIDevice::runCPU(BYTE cpuID)
 	dsu_set_reg_sp(cpuID, 1, start);
 	dsu_set_reg_fp(cpuID, 1, start);
 
-	this->iowrite32(UART0_CTRL_REG, 0x00000843); // Set TE, RE, DB, LB bits 1 and clear all other parameters on UART0
-
 	dsu_set_cpu_wake_up(cpuID);					 // CPU wake from setup.c
 	dsu_clear_cpu_break_on_iu_watchpoint(cpuID); // Not strictly needed with the iowrite down below
 	dsu_clear_force_debug_on_watchpoint(cpuID);	 // Needed to resume cpu
 	dsu_clear_cpu_error_mode(cpuID);			 // Not strictly needed with the iowrite down below
+
+	this->iowrite32(UART0_CTRL_REG, 0x00000843); // Set TE, RE, DB, LB bits 1 and clear all other parameters on UART0
 
 	this->iowrite32(0x90000000, 0x000002ef); // ACTUALLY RESUMES CPU
 
