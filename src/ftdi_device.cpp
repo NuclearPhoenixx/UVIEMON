@@ -24,7 +24,7 @@ using namespace std;
 
 FTDIDevice::FTDIDevice()
 {
-	// cout << "Hello World!" << endl;
+	_firstRun = true;
 }
 
 FTDIDevice::~FTDIDevice()
@@ -588,6 +588,13 @@ BYTE FTDIDevice::runCPU(BYTE cpuID)
 		return 0x82; // Return a Software trap instruction
 	}
 	*/
+
+	// Sometimes fixes an issue that can throw an error on first run
+	if (_firstRun && tt != 0x80)
+	{
+		_firstRun = false;
+		tt = runCPU(cpuID); // Just run it again and it'll probably work
+	}
 
 	return tt;
 }

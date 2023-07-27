@@ -33,6 +33,7 @@ class FTDIDevice
 private:
 	FT_HANDLE _ftHandle;
 	DWORD _deviceIndex;
+	bool _firstRun;
 
 	FT_STATUS _initMPSSEMode();
 	FT_STATUS _resetJTAGStateMachine();
