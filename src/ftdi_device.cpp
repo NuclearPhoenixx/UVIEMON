@@ -583,7 +583,6 @@ BYTE FTDIDevice::runCPU(BYTE cpuID)
 	if (_firstRun && (tt != 0x80 || tbr_tt != 0x80))
 	{
 		_firstRun = false;
-		cout << "first" << endl;
 		return runCPU(cpuID); // Just run it again and it'll probably work
 	}
 
