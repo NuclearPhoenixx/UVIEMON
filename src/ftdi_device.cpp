@@ -577,6 +577,14 @@ BYTE FTDIDevice::runCPU(BYTE cpuID)
 	unsigned int tbr_tt = dsu_get_reg_tbr(cpuID) & bitmask; // Use bitwise AND to extract the desired bits
 	tbr_tt >>= 4;											// Shift the result back to the rightmost position
 
+	// Sometimes fixes an issue that can throw an error on first run
+	if (_firstRun && (tt != 0x80 || tbr_tt != 0x80))
+	{
+		_firstRun = false;
+		cout << "first" << endl;
+		return runCPU(cpuID); // Just run it again and it'll probably work
+	}
+
 	if (tt == 0x80 && tbr_tt != 0x80)
 	{
 		return tbr_tt;
@@ -588,13 +596,6 @@ BYTE FTDIDevice::runCPU(BYTE cpuID)
 		return 0x82; // Return a Software trap instruction
 	}
 	*/
-
-	// Sometimes fixes an issue that can throw an error on first run
-	if (_firstRun && tt != 0x80)
-	{
-		_firstRun = false;
-		tt = runCPU(cpuID); // Just run it again and it'll probably work
-	}
 
 	return tt;
 }
