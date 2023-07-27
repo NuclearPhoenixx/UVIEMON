@@ -215,7 +215,9 @@ FT_STATUS FTDIDevice::_initMPSSEMode()
 		return ftStatus;
 	}
 
-	sleep(0.5); // Wait for all the USB stuff to complete and work, 500ms
+	// Wait for all the USB stuff to complete and work.
+	sleep(1); // THIS DELAY IS CRUCIAL! IF YOU REMOVE IT, WEIRD THINGS <WILL> HAPPEN INCLUDING RUN FAILING UNEXPECTEDLY
+
 	cout << "done!" << endl;
 	cout << "Configuring MPSSE... " << flush;
 
