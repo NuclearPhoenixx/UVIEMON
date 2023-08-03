@@ -1364,11 +1364,13 @@ void FTDIDevice::ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress
 
 	WORD readChunks = ceil((float)size / 256.0); // How many individual read chunks are needed
 
+	DWORD tempData[256]; // Allocate the tempData array outside the loop with max size
+
 	for (WORD i = 0; i < readChunks; i++)
 	{
 		if (progress) // Optional terminal progress output
 		{
-			cout << "\rReading data from memory... " << dec << (unsigned int)((float)i / (float)(readChunks - 1.0) * 100.0) << "%  " << flush;
+			cout << "\rReading data from memory... " << dec << (i * 100) / (readChunks - 1) << "%  " << flush;
 		}
 
 		DWORD addr = startAddr + 1024 * i;
@@ -1382,8 +1384,6 @@ void FTDIDevice::ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress
 		{
 			readSize = 256;
 		}
-
-		DWORD tempData[readSize];
 
 		ioread32raw(addr, tempData, readSize);
 
@@ -1909,11 +1909,13 @@ void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progres
 
 	WORD writeChunks = ceil((float)size / 256.0); // How many individual write chunks are needed
 
+	DWORD tempData[256]; // Allocate the tempData array outside the loop with max size
+
 	for (WORD i = 0; i < writeChunks; i++)
 	{
 		if (progress) // Optional terminal progress output
 		{
-			cout << "\rWriting data to memory... " << dec << (unsigned int)((float)i / (float)(writeChunks - 1.0) * 100.0) << "%  " << flush;
+			cout << "\rWriting data to memory... " << dec << (i * 100) / (writeChunks - 1) << "%  " << flush;
 		}
 
 		DWORD addr = startAddr + 1024 * i;
@@ -1927,8 +1929,6 @@ void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progres
 		{
 			writeSize = 256;
 		}
-
-		DWORD tempData[writeSize];
 
 		for (WORD j = 0; j < writeSize; j++)
 		{
