@@ -548,20 +548,15 @@ BYTE FTDIDevice::runCPU(BYTE cpuID)
 
 	while (!stopped)
 	{
-		DWORD status_reg = this->ioread32(UART0_STATUS_REG);
-		unsigned int TCNT_bits = (status_reg & mask) >> 20; // Use bitwise AND to extract the bits, i.e. number of data frames in the transmitter FIFO
+		// Extract the number of data frames in the transmitter FIFO from the UART status register
+		unsigned int TCNT_bits = (this->ioread32(UART0_STATUS_REG) & mask) >> 20;
 
 		if (TCNT_bits > 0)
 		{
 			// Grab all data from UART if available
-			// DWORD data[TCNT_bits];
-
-			// ioread32raw(UART0_FIFO_REG, data, TCNT_bits);
-
 			for (size_t i = 0; i < TCNT_bits; i++)
 			{
-				// cout << (char)data[i] << flush;
-				cout << (char)this->ioread32(UART0_FIFO_REG) << flush;
+				cout << (char)this->ioread32(UART0_FIFO_REG); // << flush;
 			}
 		}
 		else
