@@ -1370,7 +1370,7 @@ void FTDIDevice::ioread32(DWORD startAddr, DWORD *data, WORD size, bool progress
 	{
 		if (progress) // Optional terminal progress output
 		{
-			cout << "\rReading data from memory... " << dec << (i * 100) / (readChunks - 1) << "%  " << flush;
+			cout << "\rReading data from memory... " << dec << (unsigned int)((i * 100.0) / (readChunks - 1.0)) << "%  " << flush;
 		}
 
 		DWORD addr = startAddr + 1024 * i;
@@ -1915,7 +1915,7 @@ void FTDIDevice::iowrite32(DWORD startAddr, DWORD *data, WORD size, bool progres
 	{
 		if (progress) // Optional terminal progress output
 		{
-			cout << "\rWriting data to memory... " << dec << (i * 100) / (writeChunks - 1) << "%  " << flush;
+			cout << "\rWriting data to memory... " << dec << (unsigned int)((i * 100.0) / (writeChunks - 1.0)) << "%  " << flush;
 		}
 
 		DWORD addr = startAddr + 1024 * i;
