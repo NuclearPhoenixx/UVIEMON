@@ -74,6 +74,7 @@ void console()
 			cout << "List of commands:" << endl;
 			cout << "  help: \t This list of all available commands" << endl;
 			cout << "  scan: \t Scan for all possible IR opcodes" << endl;
+			cout << "  reset: \t Resets CPU core 1 that also handles all 'run' calls" << endl;
 			cout << endl;
 			cout << "  mem: \t\t Read <length#2> 32-bit DWORDs from a starting <address#1> out of the memory" << endl;
 			cout << "  memh: \t Read <length#2> 16-bit WORDs from a starting <address#1> out of the memory" << endl;
@@ -86,6 +87,7 @@ void console()
 			cout << endl;
 			cout << "  load: \t Write a file with <filePath#1> to the device memory" << endl;
 			cout << "  verify: \t Verify a file written to the device memory with <filePath#1>" << endl;
+			cout << "  run: \t\t Run an executable that has recently been uploaded to memory" << endl;
 			cout << "  wash: \t Wash memory with a certain DWORD <length#1> of hex DWORD <characters#3> starting at an <address#2>" << endl;
 			cout << endl;
 			cout << "  exit: \t Exit uviemon" << endl;

@@ -484,6 +484,6 @@ void run(FTDIDevice &handle)
 void reset(FTDIDevice &handle)
 {
 	cout << "Resetting...";
-	handle.reset();
+	handle.reset(0);
 	cout << " Done." << endl;
 }
