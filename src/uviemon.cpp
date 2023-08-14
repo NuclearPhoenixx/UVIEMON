@@ -364,7 +364,7 @@ void console()
 			}
 			else
 			{
-				cerr << "Missing argument..." << endl;
+				cerr << "Missing arguments length, address or filename..." << endl;
 			}
 		}
 		else if (words[0] == "run")
