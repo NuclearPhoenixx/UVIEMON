@@ -135,6 +135,7 @@ FT_STATUS FTDIDevice::open(DWORD deviceIndex)
 		return ftStatus;
 	}
 
+	// Move this to another step?
 	_initCore1(); // Initialize core 1 (this will run all the programs)
 	_initCore2(); // Initialize core 2 (this will be idle)
 
