@@ -437,8 +437,8 @@ int main(int argc, char *argv[])
 {
 	cout << "\n  ** uviemon v" << VERSION << " **\n"
 		 << endl;
-	cout << "  GR712RC Dual-Core LEON3FT SPARC V8 Processor debugging" << endl;
-	cout << "  monitor using the FTDI FT2232H chipset for communication.\n"
+	cout << "  LEON SPARC V8 Processor debugging monitor using" << endl;
+	cout << "  the FTDI FT2232H chipset for communication.\n"
 		 << endl;
 
 	if (argc < 2)
